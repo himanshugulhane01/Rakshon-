@@ -66,8 +66,8 @@ A verified debug APK has already been built and is ready to install!
 2. Verify your device is recognized:
    adb devices
 
-3. Install the APK:
-   adb install d:\Projects\ScamShield\mobile\android\app\build\outputs\apk\debug\app-debug.apk
+3. Install the APK (use -r to reinstall/replace existing installation):
+   adb install -r d:\Projects\ScamShield\mobile\android\app\build\outputs\apk\debug\app-debug.apk
 
 4. Launch the app "ScamShield" from your phone's app drawer.
 
