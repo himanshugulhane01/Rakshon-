@@ -1,0 +1,117 @@
+================================================================================
+                    SCAMSHIELD - HOW TO RUN THIS PROJECT
+================================================================================
+
+ScamShield is a Senior-First Digital Fraud Protection Android Application consisting
+of two main parts:
+  1. Backend API (FastAPI Scam Intelligence Engine)
+  2. Mobile App (React Native & Kotlin Native Android App)
+
+--------------------------------------------------------------------------------
+PREREQUISITES
+--------------------------------------------------------------------------------
+1. Python 3.11+ (Python 3.13 is installed in backend/venv)
+2. Node.js 18+ and npm (Node v24 is installed)
+3. JDK 17 (installed at C:\Users\user\jdk-17)
+4. Android SDK (Platform 34 / Android 14) and Android Device or Emulator (with USB debugging enabled)
+5. adb (Android Debug Bridge) in your PATH
+
+================================================================================
+PART 1: RUNNING THE BACKEND SERVER (FastAPI)
+================================================================================
+
+1. Open a terminal (PowerShell or Command Prompt) and navigate to the backend directory:
+   cd d:\Projects\ScamShield\backend
+
+2. Activate the Python virtual environment:
+   In PowerShell:
+     .\venv\Scripts\Activate.ps1
+   In Command Prompt (cmd):
+     venv\Scripts\activate.bat
+
+3. Start the FastAPI server with live reload:
+   python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+4. Verify the server is running:
+   - Interactive Swagger API Documentation:
+     http://localhost:8000/docs
+   - Health Check:
+     http://localhost:8000/api/v1/health
+
+5. To run the automated backend test suite (46 tests):
+   python -m pytest tests -v
+
+================================================================================
+PART 2: RUNNING THE MOBILE APPLICATION (React Native / Android)
+================================================================================
+
+OPTION A: INSTALL PRE-BUILT APK DIRECTLY (FASTEST)
+---------------------------------------------------
+A verified debug APK has already been built and is ready to install!
+
+1. Connect your Android phone via USB (with "USB Debugging" enabled in Developer Options),
+   or start an Android Emulator.
+
+2. Verify your device is recognized:
+   adb devices
+
+3. Install the APK:
+   adb install d:\Projects\ScamShield\mobile\android\app\build\outputs\apk\debug\app-debug.apk
+
+4. Launch the app "ScamShield" from your phone's app drawer.
+
+
+OPTION B: RUN WITH METRO BUNDLER (DEVELOPMENT MODE)
+---------------------------------------------------
+1. Open a new terminal and navigate to the mobile folder:
+   cd d:\Projects\ScamShield\mobile
+
+2. Start the Metro JavaScript bundler:
+   npm start
+
+3. In a second terminal, launch the app on your connected device or emulator:
+   cd d:\Projects\ScamShield\mobile
+   npm run android
+
+4. To run the mobile test suite (109 tests across 12 suites):
+   npm test -- --watchAll=false --runInBand
+
+5. To run the TypeScript type checker:
+   node node_modules/typescript/bin/tsc --noEmit --project tsconfig.json
+
+================================================================================
+PART 3: REBUILDING THE ANDROID APK (KOTLIN & ROOM DATABASE)
+================================================================================
+
+If you modify native Kotlin code or want to build a fresh APK:
+
+1. Navigate to the android folder:
+   cd d:\Projects\ScamShield\mobile\android
+
+2. Run native unit tests:
+   .\gradlew.bat testDebugUnitTest
+
+3. Build the debug APK:
+   .\gradlew.bat assembleDebug
+
+4. The new APK will be generated at:
+   d:\Projects\ScamShield\mobile\android\app\build\outputs\apk\debug\app-debug.apk
+
+================================================================================
+PART 4: RECOMMENDED DEMO TEST FLOW
+================================================================================
+1. Launch ScamShield on your device.
+2. Select your preferred language (English, Hindi, or Marathi).
+3. View the 3 senior onboarding slides and log in with any 10-digit mobile number.
+4. On the Home Dashboard:
+   - Message Guardian: Paste a scam message (e.g. electricity cutoff threat) and tap
+     "Analyze Message" to see the threat breakdown and golden rules.
+   - Call Guardian: View offline threat database status and safe-by-default policy.
+   - Scam Lens: Paste or inspect a suspicious UPI payment link or QR code payload.
+   - Voice Guardian: Tap the large microphone button to speak or listen to safety advice.
+   - Scam Simulator: Practice 8 realistic Indian scam scenarios and view your reflex score
+     on the Awareness Learning Dashboard.
+   - Emergency Mode: One-tap access to 1930 Cyber Helpline, official cybercrime portal,
+     verified bank helplines, and standardized freeze notices.
+   - Family Circle: Generate a 6-digit consent code to connect a trusted family caregiver.
+================================================================================
