@@ -26,12 +26,19 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${rootProject.ext.kotlinVersion}")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
+
+    // React Native Android
+    implementation("com.facebook.react:react-android:0.76.2")
 
     // Room Database for Offline Zero-Network Threat Screening
     implementation("androidx.room:room-runtime:${rootProject.ext.roomVersion}")

@@ -2,9 +2,11 @@ package com.scamshield
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import com.facebook.react.ReactActivity
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ReactActivity() {
+
+    override fun getMainComponentName(): String = "ScamShield"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
