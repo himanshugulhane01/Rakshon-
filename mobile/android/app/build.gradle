@@ -37,8 +37,9 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
 
-    // React Native Android
+    // React Native Android Core & Hermes Engine
     implementation("com.facebook.react:react-android:0.76.2")
+    implementation("com.facebook.react:hermes-android:0.76.2")
 
     // Room Database for Offline Zero-Network Threat Screening
     implementation("androidx.room:room-runtime:${rootProject.ext.roomVersion}")
