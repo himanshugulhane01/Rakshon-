@@ -32,10 +32,21 @@ PART 1: RUNNING THE BACKEND SERVER (FastAPI)
 3. Start the FastAPI server with live reload:
    python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-4. Verify the server is running:
-   - Interactive Swagger API Documentation:
+   *** IMPORTANT: DO NOT OPEN http://0.0.0.0:8000 IN YOUR BROWSER! ***
+   When Uvicorn starts, it displays:
+     "INFO: Uvicorn running on http://0.0.0.0:8000"
+   '0.0.0.0' is a server bind address telling Uvicorn to listen on all network cards.
+   Web browsers (Chrome, Edge, Firefox) CANNOT connect directly to 0.0.0.0 and will
+   display the error: "ERR_ADDRESS_INVALID".
+
+4. Open the API in your Web Browser using localhost or 127.0.0.1:
+   - Interactive Swagger API Documentation (Recommended):
      http://localhost:8000/docs
-   - Health Check:
+     or
+     http://127.0.0.1:8000/docs
+   - API Root:
+     http://localhost:8000/
+   - API Health Check:
      http://localhost:8000/api/v1/health
 
 5. To run the automated backend test suite (46 tests):
@@ -115,3 +126,4 @@ PART 4: RECOMMENDED DEMO TEST FLOW
      verified bank helplines, and standardized freeze notices.
    - Family Circle: Generate a 6-digit consent code to connect a trusted family caregiver.
 ================================================================================
+

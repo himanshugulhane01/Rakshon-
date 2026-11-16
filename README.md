@@ -49,7 +49,11 @@ python -m pytest tests -v
 python -m alembic upgrade head
 
 # Start API server
-uvicorn app.main:app --reload --port 8000
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+# Open in your browser (do NOT enter 0.0.0.0 in browser; use localhost):
+# Swagger UI: http://localhost:8000/docs
+# Health:     http://localhost:8000/api/v1/health
 ```
 
 ### Mobile
