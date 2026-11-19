@@ -14,6 +14,7 @@ import { SeniorHeader } from '../components/SeniorHeader';
 import { SeniorButton } from '../components/SeniorButton';
 import { SeniorCard } from '../components/SeniorCard';
 import { SeniorBadge } from '../components/SeniorBadge';
+import { BottomNavigation, BottomNavTab } from '../components/BottomNavigation';
 import { StorageService, SimulatorLearningStats } from '../services/storage';
 import {
   SIMULATOR_SCENARIOS,
@@ -23,11 +24,22 @@ import {
 
 export interface ScamSimulatorScreenProps {
   onBack?: () => void;
+  onSelectTab?: (tab: BottomNavTab) => void;
 }
 
-export const ScamSimulatorScreen: React.FC<ScamSimulatorScreenProps> = ({ onBack }) => {
+export const ScamSimulatorScreen: React.FC<ScamSimulatorScreenProps> = ({ onBack, onSelectTab }) => {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
+  const isDevanagari = currentLang === 'hi' || currentLang === 'mr';
+
+  const handleBottomTabSelect = (tab: BottomNavTab) => {
+    if (tab === 'learn') return;
+    if (onSelectTab) {
+      onSelectTab(tab);
+    } else if (tab === 'home') {
+      onBack?.();
+    }
+  };
 
   const [activeTab, setActiveTab] = useState<'practice' | 'dashboard'>('practice');
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -212,21 +224,33 @@ export const ScamSimulatorScreen: React.FC<ScamSimulatorScreenProps> = ({ onBack
         {activeTab === 'practice' ? (
           <>
             {/* Progress Bar & Badges */}
-            <View style={styles.progressHeaderRow}>
-              <SeniorBadge
-                variant="info"
-                label={t('scamSimulator.progressCount', {
-                  current: currentIndex + 1,
-                  total: totalScenarios,
-                })}
-              />
-              <SeniorBadge
-                variant={completedIds.length >= totalScenarios ? 'safe' : 'caution'}
-                label={t('scamSimulator.scoreLabel', {
-                  completed: completedIds.length,
-                  total: totalScenarios,
-                })}
-              />
+            <View style={styles.progressContainer}>
+              <View style={styles.progressHeaderRow}>
+                <SeniorBadge
+                  variant="info"
+                  label={t('scamSimulator.progressCount', {
+                    current: currentIndex + 1,
+                    total: totalScenarios,
+                  })}
+                  style={styles.compactBadge}
+                />
+                <SeniorBadge
+                  variant={completedIds.length >= totalScenarios ? 'safe' : 'caution'}
+                  label={t('scamSimulator.scoreLabel', {
+                    completed: completedIds.length,
+                    total: totalScenarios,
+                  })}
+                  style={styles.compactBadge}
+                />
+              </View>
+              <View style={styles.progressBarTrack}>
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    { width: `${((currentIndex + 1) / totalScenarios) * 100}%` },
+                  ]}
+                />
+              </View>
             </View>
 
             {/* COMPLETION BANNER (when all scenarios completed) */}
@@ -270,12 +294,38 @@ export const ScamSimulatorScreen: React.FC<ScamSimulatorScreenProps> = ({ onBack
                 {/* Scenario Title */}
                 <Text style={styles.scenarioTitle}>{getLocalizedTitle(currentScenario)}</Text>
 
-                {/* Suspicious Situation Box */}
+                {/* Suspicious Situation Box - Realistic SMS Preview */}
                 <Text style={styles.situationLabel}>
                   {t('scamSimulator.scenarioDescriptionLabel')}
                 </Text>
-                <View style={styles.messageBox}>
-                  <Text style={styles.messageText}>{getLocalizedMessage(currentScenario)}</Text>
+                <View style={styles.smsSimulationCard}>
+                  <View style={styles.smsHeaderBar}>
+                    <View style={styles.smsSenderBadge}>
+                      <Text style={styles.smsSenderIcon}>💬</Text>
+                      <Text style={styles.smsSenderName}>
+                        {currentScenario.id === 'scenario_electricity'
+                          ? 'SMS • VM-DISCOM'
+                          : currentScenario.id === 'scenario_police'
+                          ? 'CALL / NOTICE • CBI-CYBER'
+                          : currentScenario.id === 'scenario_kyc'
+                          ? 'SMS • SBI-KYC'
+                          : currentScenario.id === 'scenario_otp_upi'
+                          ? 'SMS • PAYTM-SECURE'
+                          : currentScenario.id === 'scenario_delivery'
+                          ? 'SMS • INDPOST'
+                          : currentScenario.id === 'scenario_malware'
+                          ? 'BROWSER • APK-INSTALL'
+                          : currentScenario.id === 'scenario_qr_fraud'
+                          ? 'QR CODE • UPI-PAY'
+                          : 'SMS • HELPLINE-ALERT'}
+                      </Text>
+                    </View>
+                    <Text style={styles.smsTimestamp}>8:00 PM</Text>
+                  </View>
+                  <View style={styles.smsDivider} />
+                  <View style={styles.messageBox}>
+                    <Text style={styles.messageText}>{getLocalizedMessage(currentScenario)}</Text>
+                  </View>
                 </View>
 
                 {/* Question */}
@@ -283,20 +333,27 @@ export const ScamSimulatorScreen: React.FC<ScamSimulatorScreenProps> = ({ onBack
                   {`❓ ${getLocalizedQuestion(currentScenario)}`}
                 </Text>
 
-                {/* Choices */}
+                {/* Choices with Circular Option Letters */}
                 <View style={styles.choicesList}>
-                  {currentScenario.choices.map((choice) => {
+                  {currentScenario.choices.map((choice, index) => {
                     const isSelected = selectedChoiceId === choice.id;
+                    const optionLetter = String.fromCharCode(65 + index); // 'A', 'B', 'C'
                     let choiceCardStyle: any = styles.choiceButton;
                     let choiceTextStyle: any = styles.choiceText;
+                    let badgeStyle: any = styles.choiceLetterBadge;
+                    let badgeTextStyle: any = styles.choiceLetterText;
 
                     if (showExplanation && isSelected) {
                       if (choice.isSafe) {
                         choiceCardStyle = [styles.choiceButton, styles.choiceSafeSelected];
                         choiceTextStyle = [styles.choiceText, styles.choiceSafeText];
+                        badgeStyle = [styles.choiceLetterBadge, styles.badgeSafe];
+                        badgeTextStyle = [styles.choiceLetterText, styles.badgeTextSafe];
                       } else {
                         choiceCardStyle = [styles.choiceButton, styles.choiceDangerSelected];
                         choiceTextStyle = [styles.choiceText, styles.choiceDangerText];
+                        badgeStyle = [styles.choiceLetterBadge, styles.badgeDanger];
+                        badgeTextStyle = [styles.choiceLetterText, styles.badgeTextDanger];
                       }
                     }
 
@@ -309,14 +366,17 @@ export const ScamSimulatorScreen: React.FC<ScamSimulatorScreenProps> = ({ onBack
                         accessible={true}
                         accessibilityRole="button"
                         accessibilityLabel={getLocalizedChoiceText(choice)}
+                        activeOpacity={0.7}
                       >
-                        <Text style={styles.choiceIcon}>
-                          {showExplanation && isSelected
-                            ? choice.isSafe
-                              ? '✓'
-                              : '⚠️'
-                            : '👉'}
-                        </Text>
+                        <View style={badgeStyle}>
+                          <Text style={badgeTextStyle}>
+                            {showExplanation && isSelected
+                              ? choice.isSafe
+                                ? '✓'
+                                : '⚠️'
+                              : optionLetter}
+                          </Text>
+                        </View>
                         <Text style={choiceTextStyle}>{getLocalizedChoiceText(choice)}</Text>
                       </TouchableOpacity>
                     );
@@ -517,6 +577,13 @@ export const ScamSimulatorScreen: React.FC<ScamSimulatorScreenProps> = ({ onBack
           </View>
         )}
       </ScrollView>
+
+      {/* 5-Item Bottom Navigation */}
+      <BottomNavigation
+        activeTab="learn"
+        onSelectTab={handleBottomTabSelect}
+        isDevanagari={isDevanagari}
+      />
     </SafeAreaView>
   );
 };
@@ -537,10 +604,10 @@ const styles = StyleSheet.create({
   tabButton: {
     flex: 1,
     minHeight: 48,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.button,
     backgroundColor: SeniorTheme.colors.backgroundMain,
     borderWidth: 1.5,
-    borderColor: SeniorTheme.colors.borderSubtle,
+    borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: SeniorTheme.spacing.sm,
@@ -562,11 +629,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: SeniorTheme.spacing.lg,
     paddingBottom: SeniorTheme.spacing.xxl,
   },
+  progressContainer: {
+    marginVertical: SeniorTheme.spacing.sm,
+    gap: 8,
+  },
   progressHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: SeniorTheme.spacing.sm,
+    gap: 8,
+  },
+  compactBadge: {
+    flexShrink: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  progressBarTrack: {
+    height: 6,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: SeniorTheme.colors.richEmerald,
+    borderRadius: 3,
   },
   topicRow: {
     marginBottom: SeniorTheme.spacing.xs,
@@ -580,6 +667,7 @@ const styles = StyleSheet.create({
   },
   scenarioCard: {
     marginBottom: SeniorTheme.spacing.xl,
+    borderRadius: SeniorTheme.radii.card,
   },
   scenarioTitle: {
     fontSize: SeniorTheme.typography.titleMedium,
@@ -591,21 +679,63 @@ const styles = StyleSheet.create({
     fontSize: SeniorTheme.typography.bodySmall,
     fontWeight: '700',
     color: SeniorTheme.colors.textDim,
-    marginBottom: 6,
+    marginBottom: 8,
+  },
+  smsSimulationCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    padding: 12,
+    marginBottom: SeniorTheme.spacing.md,
+    shadowColor: '#152720',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  smsHeaderBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  smsSenderBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  smsSenderIcon: {
+    fontSize: 16,
+  },
+  smsSenderName: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: SeniorTheme.colors.richEmerald,
+    letterSpacing: 0.5,
+  },
+  smsTimestamp: {
+    fontSize: 11,
+    color: '#94A3B8',
+    fontWeight: '600',
+  },
+  smsDivider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginBottom: 10,
   },
   messageBox: {
-    backgroundColor: '#FFF9C4', // Soft warning yellow
-    padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.md,
-    borderLeftWidth: 5,
-    borderLeftColor: '#FBC02D',
-    marginBottom: SeniorTheme.spacing.md,
+    backgroundColor: '#FFFFFF',
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
   },
   messageText: {
-    fontSize: SeniorTheme.typography.body,
+    fontSize: 15,
     color: SeniorTheme.colors.deepForest,
     fontWeight: '600',
-    lineHeight: 24,
+    lineHeight: 22,
   },
   questionText: {
     fontSize: SeniorTheme.typography.bodyLarge,
@@ -614,26 +744,65 @@ const styles = StyleSheet.create({
     marginBottom: SeniorTheme.spacing.md,
   },
   choicesList: {
-    gap: SeniorTheme.spacing.sm,
+    gap: 12,
     marginBottom: SeniorTheme.spacing.md,
   },
   choiceButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.md,
-    backgroundColor: SeniorTheme.colors.backgroundMain,
+    padding: 14,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-    borderColor: SeniorTheme.colors.borderSubtle,
-    minHeight: 56,
+    borderColor: '#E2E8F0',
+    minHeight: 60,
+    shadowColor: '#152720',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
+    gap: 12,
   },
   choiceSafeSelected: {
-    borderColor: SeniorTheme.colors.riskSafe,
-    backgroundColor: SeniorTheme.colors.riskSafeSurface,
+    borderColor: SeniorTheme.colors.richEmerald,
+    backgroundColor: '#F0FDF4',
   },
   choiceDangerSelected: {
     borderColor: SeniorTheme.colors.riskDanger,
-    backgroundColor: SeniorTheme.colors.riskDangerSurface,
+    backgroundColor: '#FEF2F2',
+  },
+  choiceLetterBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  choiceLetterText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  badgeSafe: {
+    backgroundColor: '#DCFCE7',
+    borderColor: SeniorTheme.colors.richEmerald,
+  },
+  badgeTextSafe: {
+    color: SeniorTheme.colors.richEmerald,
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  badgeDanger: {
+    backgroundColor: '#FEE2E2',
+    borderColor: SeniorTheme.colors.riskDanger,
+  },
+  badgeTextDanger: {
+    color: SeniorTheme.colors.riskDanger,
+    fontSize: 14,
+    fontWeight: '900',
   },
   choiceIcon: {
     fontSize: 20,
@@ -644,9 +813,10 @@ const styles = StyleSheet.create({
     color: SeniorTheme.colors.deepForest,
     flex: 1,
     lineHeight: 22,
+    fontWeight: '500',
   },
   choiceSafeText: {
-    color: SeniorTheme.colors.riskSafe,
+    color: SeniorTheme.colors.richEmerald,
     fontWeight: '700',
   },
   choiceDangerText: {
@@ -658,7 +828,7 @@ const styles = StyleSheet.create({
   },
   feedbackBanner: {
     padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.button,
     marginBottom: SeniorTheme.spacing.md,
   },
   feedbackBannerSafe: {
@@ -685,9 +855,9 @@ const styles = StyleSheet.create({
   explanationBox: {
     backgroundColor: SeniorTheme.colors.backgroundMain,
     padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.button,
     borderWidth: 1,
-    borderColor: SeniorTheme.colors.borderSubtle,
+    borderColor: '#E2E8F0',
     marginBottom: SeniorTheme.spacing.md,
   },
   explanationHeading: {
@@ -706,7 +876,7 @@ const styles = StyleSheet.create({
   ruleLessonBox: {
     backgroundColor: SeniorTheme.colors.riskSafeSurface,
     padding: 10,
-    borderRadius: SeniorTheme.radii.sm,
+    borderRadius: SeniorTheme.radii.button,
   },
   ruleLessonText: {
     fontSize: SeniorTheme.typography.bodySmall,
@@ -720,12 +890,15 @@ const styles = StyleSheet.create({
   completedCard: {
     alignItems: 'center',
     paddingVertical: SeniorTheme.spacing.xl,
+    borderRadius: SeniorTheme.radii.card,
   },
   trophyCircle: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#FFF9C4',
+    backgroundColor: '#FFFBEB',
+    borderWidth: 2,
+    borderColor: '#FDE68A',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SeniorTheme.spacing.md,
@@ -757,6 +930,7 @@ const styles = StyleSheet.create({
   },
   dashboardHeroCard: {
     marginBottom: SeniorTheme.spacing.md,
+    borderRadius: SeniorTheme.radii.card,
   },
   dashboardHeading: {
     fontSize: SeniorTheme.typography.titleMedium,
@@ -778,7 +952,7 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
     borderRadius: 45,
-    backgroundColor: SeniorTheme.colors.riskSafeSurface,
+    backgroundColor: '#F0FDF4',
     borderWidth: 3,
     borderColor: SeniorTheme.colors.richEmerald,
     justifyContent: 'center',

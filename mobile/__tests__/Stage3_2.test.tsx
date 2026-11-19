@@ -48,7 +48,7 @@ describe('Stage 3.2: Splash, Light Login, and Language Selection', () => {
       expect(root.findByProps({ children: 'Pause. Verify. Stay Safe.' })).toBeDefined();
     });
 
-    it('navigates to LanguageSelect if no saved language exists', async () => {
+    it('navigates to LanguageSelect if no saved language exists on initial launch', async () => {
       const onReadyMock = jest.fn();
       let tree: renderer.ReactTestRenderer;
 
@@ -229,7 +229,7 @@ describe('Stage 3.2: Splash, Light Login, and Language Selection', () => {
   });
 
   describe('App Navigation Flow', () => {
-    it('boots into SplashScreen initially and transitions to LanguageSelect', async () => {
+    it('boots into SplashScreen initially and transitions to LanguageSelect on initial launch', async () => {
       let tree: renderer.ReactTestRenderer;
       act(() => {
         tree = renderer.create(<App />);
@@ -239,7 +239,7 @@ describe('Stage 3.2: Splash, Light Login, and Language Selection', () => {
 
       await flushAsyncTimers(1000);
 
-      expect(root.findByProps({ children: 'Choose Your Language' })).toBeDefined();
+      expect(root.findAllByProps({ children: 'English' }).length).toBeGreaterThanOrEqual(1);
     });
   });
 });

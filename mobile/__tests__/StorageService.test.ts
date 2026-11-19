@@ -47,5 +47,29 @@ describe('StorageService (Phase 3)', () => {
       StorageService.setSecureCredential('user_password', 'MySecretPass123')
     ).rejects.toThrow(SecurityViolationError);
   });
+
+  it('manages dynamic user full name without hardcoded fallbacks', async () => {
+    expect(await StorageService.getUserFullName()).toBe('');
+
+    await StorageService.setUserFullName('Ramesh Kumar');
+    expect(await StorageService.getUserFullName()).toBe('Ramesh Kumar');
+
+    // Trims whitespace
+    await StorageService.setUserFullName('  Sunita Patil  ');
+    expect(await StorageService.getUserFullName()).toBe('Sunita Patil');
+  });
+
+  it('manages active session state and session clearance', async () => {
+    expect(await StorageService.hasActiveSession()).toBe(false);
+
+    await StorageService.setSecureCredential('scamshield_sec_user_phone_hash', '+91 98765 43210');
+    await StorageService.setUserFullName('Vikram Rao');
+    expect(await StorageService.hasActiveSession()).toBe(true);
+    expect(await StorageService.getUserFullName()).toBe('Vikram Rao');
+
+    await StorageService.clearUserSession();
+    expect(await StorageService.hasActiveSession()).toBe(false);
+    expect(await StorageService.getUserFullName()).toBe('');
+  });
 });
 

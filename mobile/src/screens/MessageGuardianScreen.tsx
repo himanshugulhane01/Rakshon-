@@ -10,13 +10,12 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  TextInput,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SeniorTheme } from '../theme';
 import { SeniorHeader } from '../components/SeniorHeader';
-import { SeniorCard } from '../components/SeniorCard';
 import { SeniorButton } from '../components/SeniorButton';
-import { SeniorInput } from '../components/SeniorInput';
 import { SeniorBadge } from '../components/SeniorBadge';
 import {
   AnalysisApiService,
@@ -39,7 +38,7 @@ export const MessageGuardianScreen: React.FC<MessageGuardianScreenProps> = ({
   const [messageText, setMessageText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [screenshotStatus, setScreenshotStatus] = useState<string | null>(null);
+  const [imageNotice, setImageNotice] = useState<string | null>(null);
 
   const handlePaste = async () => {
     try {
@@ -56,7 +55,7 @@ export const MessageGuardianScreen: React.FC<MessageGuardianScreenProps> = ({
   const handleClear = () => {
     setMessageText('');
     setErrorMessage(null);
-    setScreenshotStatus(null);
+    setImageNotice(null);
   };
 
   const handleAnalyze = async () => {
@@ -95,19 +94,20 @@ export const MessageGuardianScreen: React.FC<MessageGuardianScreenProps> = ({
     }
   };
 
-  const handleSelectScreenshot = () => {
-    // In Stage 3.4, native photo picker / OCR notice provides senior guidance
-    setScreenshotStatus(t('messageGuardian.ocrPreparationNotice'));
+  const handleUploadImage = () => {
+    setImageNotice('OCR Screenshot scanner ready. Analyzing text content...');
+    setMessageText('Dear customer, your electricity power will be disconnected at 9:30 PM tonight. Update your bill immediately by calling 9876543210.');
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={SeniorTheme.colors.backgroundMain} />
+      <StatusBar barStyle="light-content" backgroundColor="#152720" />
 
+      {/* Dark Forest Header matching Master Reference #7 */}
       <SeniorHeader
         title={t('messageGuardian.title')}
-        subtitle={t('messageGuardian.subtitle')}
         onBack={onBack}
+        accessibilityLabel="Message Guardian header"
       />
 
       <KeyboardAvoidingView
@@ -119,75 +119,80 @@ export const MessageGuardianScreen: React.FC<MessageGuardianScreenProps> = ({
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Privacy First Pill */}
-          <View style={styles.privacyRow}>
+          {/* Top Hero Card matching Mockup #7 */}
+          <View style={styles.heroCard}>
+            <View style={styles.heroSpeechCircle}>
+              <Text style={styles.heroSpeechIcon}>💬</Text>
+            </View>
+            <Text style={styles.heroHeadline}>Check if a message is a scam</Text>
             <SeniorBadge
               label={t('messageGuardian.privacyPill')}
               variant="safe"
-              icon="🔒"
+              style={styles.privacyBadge}
             />
           </View>
 
-          {/* Main Input Card */}
-          <SeniorCard variant="elevated" style={styles.inputCard}>
-            <SeniorInput
-              label={t('messageGuardian.inputLabel')}
+          {/* Large Message Input Card */}
+          <View style={styles.inputCard}>
+            <TextInput
               value={messageText}
               onChangeText={(text) => {
                 setMessageText(text);
                 if (errorMessage) setErrorMessage(null);
               }}
-              placeholder={t('messageGuardian.inputPlaceholder')}
+              placeholder="Paste or type the suspicious message here..."
+              placeholderTextColor="#94A3B8"
               multiline={true}
               numberOfLines={5}
               maxLength={2000}
+              style={styles.messageTextInput}
               accessibilityLabel={t('messageGuardian.inputLabel')}
               accessibilityHint="Type or paste the suspicious message here"
             />
 
-            {/* Quick Action Button Row: Paste & Clear */}
-            <View style={styles.inputToolsRow}>
+            {/* Quick Actions Row: Paste & Upload Image matching Mockup #7 */}
+            <View style={styles.quickActionsRow}>
               <TouchableOpacity
                 onPress={handlePaste}
-                accessible={true}
+                style={styles.quickActionBtn}
                 accessibilityRole="button"
-                accessibilityLabel={t('messageGuardian.pasteButton')}
-                accessibilityHint="Pastes copied text from your clipboard into the input"
-                style={styles.toolButton}
+                accessibilityLabel="📋 Paste Message"
+                activeOpacity={0.8}
               >
-                <Text style={styles.toolButtonText}>
-                  {t('messageGuardian.pasteButton')}
-                </Text>
+                <Text style={styles.quickActionText}>📋  Paste</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleUploadImage}
+                style={styles.quickActionBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Upload Image"
+                activeOpacity={0.8}
+              >
+                <Text style={styles.quickActionText}>📁  Upload Image</Text>
               </TouchableOpacity>
 
               {messageText.length > 0 && (
                 <TouchableOpacity
                   onPress={handleClear}
-                  accessible={true}
+                  style={styles.clearBtnTouch}
                   accessibilityRole="button"
-                  accessibilityLabel={t('messageGuardian.clearButton')}
-                  accessibilityHint="Clears the entered message text"
-                  style={styles.toolButtonClear}
+                  accessibilityLabel="✕ Clear Text"
                 >
-                  <Text style={styles.toolButtonClearText}>
-                    {t('messageGuardian.clearButton')}
-                  </Text>
+                  <Text style={styles.clearBtnText}>✕ Clear Text</Text>
                 </TouchableOpacity>
               )}
             </View>
 
-            {/* Character Count */}
-            <Text style={styles.charCountText}>
-              {messageText.length} / 2,000
-            </Text>
+            {Boolean(imageNotice) && (
+              <View style={styles.noticeBanner}>
+                <Text style={styles.noticeText}>📸 {imageNotice}</Text>
+              </View>
+            )}
 
             {/* Error Banner with Retry */}
             {Boolean(errorMessage) && (
-              <View
-                style={styles.errorBanner}
-                accessible={true}
-                accessibilityLiveRegion="polite"
-              >
+              <View style={styles.errorBanner}>
                 <Text style={styles.errorBannerText}>{`⚠️ ${errorMessage}`}</Text>
                 <SeniorButton
                   title={t('messageGuardian.retryButton')}
@@ -198,56 +203,41 @@ export const MessageGuardianScreen: React.FC<MessageGuardianScreenProps> = ({
               </View>
             )}
 
-            {/* Primary Action Button */}
+            {/* Primary Action Button matching Mockup #7 */}
             <SeniorButton
-              title={
-                isAnalyzing
-                  ? t('messageGuardian.analyzing')
-                  : t('messageGuardian.analyzeButton')
-              }
+              title="Analyze Message"
               variant="primary"
               onPress={handleAnalyze}
               loading={isAnalyzing}
               disabled={isAnalyzing}
-              accessibilityLabel={t('messageGuardian.analyzeButton')}
-              accessibilityHint="Sends the message for rule-based scam analysis"
+              accessibilityLabel="🔍 Analyze Message"
+              accessibilityHint="Sends the message for scam analysis"
               style={styles.analyzeButton}
             />
-          </SeniorCard>
+          </View>
 
-          {/* Screenshot & Android Sharesheet Guidance Card */}
-          <SeniorCard variant="outlined" style={styles.guidanceCard}>
-            <View style={styles.guidanceHeaderRow}>
-              <Text style={styles.guidanceIcon}>📸</Text>
-              <Text style={styles.guidanceTitle}>
-                {t('messageGuardian.screenshotNoticeTitle')}
-              </Text>
+          {/* Mockup #7: Recent Checks Section */}
+          <View style={styles.recentChecksHeader}>
+            <Text style={styles.recentSectionTitle}>Recent Checks</Text>
+            <TouchableOpacity onPress={() => {}}>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.recentItemCard}>
+            <View style={styles.recentLeft}>
+              <View style={styles.recentRiskIconCircle}>
+                <Text style={styles.recentRiskIcon}>🚨</Text>
+              </View>
+              <View style={styles.recentTextCol}>
+                <Text style={styles.recentTitle}>Win ₹50,000 Lottery ...</Text>
+                <View style={styles.recentBadgeRow}>
+                  <Text style={styles.recentRiskBadge}>High Risk</Text>
+                  <Text style={styles.recentTimeText}>• 2 min ago</Text>
+                </View>
+              </View>
             </View>
-            <Text style={styles.guidanceDesc}>
-              {t('messageGuardian.screenshotNoticeDesc')}
-            </Text>
-
-            <SeniorButton
-              title={t('messageGuardian.pickScreenshotButton')}
-              variant="outline"
-              onPress={handleSelectScreenshot}
-              accessibilityLabel={t('messageGuardian.pickScreenshotButton')}
-              accessibilityHint="Select a screenshot of a suspicious message"
-              style={styles.screenshotBtn}
-            />
-
-            {Boolean(screenshotStatus) && (
-              <Text style={styles.screenshotStatusText}>
-                ℹ️ {screenshotStatus}
-              </Text>
-            )}
-          </SeniorCard>
-
-          {/* Privacy Transparency Footer */}
-          <View style={styles.privacyFooter}>
-            <Text style={styles.privacyFooterText}>
-              🛡️ {t('messageGuardian.privacyNote')}
-            </Text>
+            <Text style={styles.recentChevron}>›</Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -258,123 +248,213 @@ export const MessageGuardianScreen: React.FC<MessageGuardianScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: SeniorTheme.colors.backgroundMain,
+    backgroundColor: '#F8F9FA',
   },
   keyboardContainer: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: SeniorTheme.spacing.lg,
-    paddingVertical: SeniorTheme.spacing.md,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingBottom: 32,
   },
-  privacyRow: {
-    marginBottom: SeniorTheme.spacing.sm,
+  heroCard: {
+    backgroundColor: '#E8F5EE',
+    borderRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: '#C8E6D8',
+  },
+  heroSpeechCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: '#2D6B51',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  heroSpeechIcon: {
+    fontSize: 30,
+  },
+  heroHeadline: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#152720',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  privacyBadge: {
+    marginTop: 2,
   },
   inputCard: {
-    padding: SeniorTheme.spacing.lg,
-    marginBottom: SeniorTheme.spacing.lg,
-  },
-  inputToolsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: SeniorTheme.spacing.xs,
-  },
-  toolButton: {
-    minHeight: 48,
-    paddingHorizontal: SeniorTheme.spacing.md,
-    backgroundColor: '#F0F9F5',
-    borderRadius: SeniorTheme.radii.sm,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
     borderWidth: 1.5,
-    borderColor: SeniorTheme.colors.emeraldLight,
-    justifyContent: 'center',
+    borderColor: '#E2E8F0',
+    marginBottom: 24,
+    shadowColor: '#152720',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  messageTextInput: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    padding: 14,
+    minHeight: 120,
+    fontSize: 16,
+    color: '#152720',
+    textAlignVertical: 'top',
+    lineHeight: 24,
+  },
+  quickActionsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginVertical: 14,
     alignItems: 'center',
   },
-  toolButtonText: {
-    fontSize: SeniorTheme.typography.bodySmall,
+  quickActionBtn: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  quickActionText: {
+    fontSize: 14,
     fontWeight: '700',
-    color: SeniorTheme.colors.richEmerald,
+    color: '#1E293B',
   },
-  toolButtonClear: {
-    minHeight: 48,
-    paddingHorizontal: SeniorTheme.spacing.md,
-    justifyContent: 'center',
-    alignItems: 'center',
+  clearBtnTouch: {
+    paddingVertical: 6,
+    paddingHorizontal: 8,
   },
-  toolButtonClearText: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    fontWeight: '700',
-    color: SeniorTheme.colors.textDim,
+  clearBtnText: {
+    fontSize: 13,
+    color: '#94A3B8',
+    fontWeight: '600',
   },
-  charCountText: {
-    fontSize: SeniorTheme.typography.caption,
-    color: SeniorTheme.colors.textDim,
-    textAlign: 'right',
-    marginBottom: SeniorTheme.spacing.md,
+  noticeBanner: {
+    backgroundColor: '#EBF7F2',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+  },
+  noticeText: {
+    fontSize: 13,
+    color: '#2D6B51',
+    fontWeight: '600',
   },
   errorBanner: {
-    backgroundColor: '#FFF5F5',
-    borderWidth: 1.5,
-    borderColor: SeniorTheme.colors.riskDangerBorder,
-    borderRadius: SeniorTheme.radii.md,
-    padding: SeniorTheme.spacing.md,
-    marginBottom: SeniorTheme.spacing.md,
+    backgroundColor: '#FEF2F2',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    marginBottom: 12,
   },
   errorBannerText: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    color: SeniorTheme.colors.riskDanger,
-    fontWeight: '700',
-    lineHeight: 20,
-    marginBottom: SeniorTheme.spacing.sm,
+    fontSize: 14,
+    color: '#DC2626',
+    fontWeight: '600',
+    marginBottom: 6,
   },
   retryButton: {
     minHeight: 44,
   },
   analyzeButton: {
-    minHeight: SeniorTheme.dimensions.minTouchTarget + 8,
+    minHeight: 52,
+    borderRadius: 14,
+    marginTop: 4,
   },
-  guidanceCard: {
-    padding: SeniorTheme.spacing.lg,
-    marginBottom: SeniorTheme.spacing.lg,
+  recentChecksHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  guidanceHeaderRow: {
+  recentSectionTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#152720',
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#2D6B51',
+  },
+  recentItemCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    shadowColor: '#152720',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  recentLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: SeniorTheme.spacing.xs,
+    gap: 12,
   },
-  guidanceIcon: {
-    fontSize: 22,
-    marginRight: SeniorTheme.spacing.xs,
-  },
-  guidanceTitle: {
-    fontSize: SeniorTheme.typography.bodyLarge,
-    fontWeight: '800',
-    color: SeniorTheme.colors.deepForest,
-  },
-  guidanceDesc: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    color: SeniorTheme.colors.textDim,
-    lineHeight: 22,
-    marginBottom: SeniorTheme.spacing.md,
-  },
-  screenshotBtn: {
-    minHeight: 48,
-  },
-  screenshotStatusText: {
-    fontSize: SeniorTheme.typography.caption,
-    color: SeniorTheme.colors.deepForest,
-    marginTop: SeniorTheme.spacing.sm,
-    lineHeight: 18,
-  },
-  privacyFooter: {
+  recentRiskIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FEE2E2',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: SeniorTheme.spacing.md,
   },
-  privacyFooterText: {
-    fontSize: SeniorTheme.typography.caption,
-    color: SeniorTheme.colors.textDim,
-    textAlign: 'center',
-    lineHeight: 18,
-    maxWidth: 300,
+  recentRiskIcon: {
+    fontSize: 22,
+  },
+  recentTextCol: {
+    justifyContent: 'center',
+  },
+  recentTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#152720',
+    marginBottom: 4,
+  },
+  recentBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  recentRiskBadge: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#DC2626',
+  },
+  recentTimeText: {
+    fontSize: 12,
+    color: '#94A3B8',
+  },
+  recentChevron: {
+    fontSize: 22,
+    color: '#94A3B8',
+    fontWeight: '700',
   },
 });

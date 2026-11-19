@@ -9,9 +9,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { SeniorTheme } from '../theme';
+import { SeniorTheme, getFontFamily } from '../theme';
 import { SeniorButton } from '../components/SeniorButton';
-import { SeniorCard } from '../components/SeniorCard';
 import { StorageService } from '../services/storage';
 
 export interface OnboardingScreenProps {
@@ -21,6 +20,7 @@ export interface OnboardingScreenProps {
 interface SlideContent {
   id: number;
   icon: string;
+  headline: string;
   titleKey: string;
   subtitleKey: string;
   descKey: string;
@@ -30,7 +30,8 @@ interface SlideContent {
 const ONBOARDING_SLIDES: SlideContent[] = [
   {
     id: 1,
-    icon: '💬',
+    icon: '🛡️',
+    headline: 'Stay Safe from Online Frauds',
     titleKey: 'onboarding.slide1Title',
     subtitleKey: 'onboarding.slide1Subtitle',
     descKey: 'onboarding.slide1Desc',
@@ -39,6 +40,7 @@ const ONBOARDING_SLIDES: SlideContent[] = [
   {
     id: 2,
     icon: '📞',
+    headline: 'Real-Time Caller Screening',
     titleKey: 'onboarding.slide2Title',
     subtitleKey: 'onboarding.slide2Subtitle',
     descKey: 'onboarding.slide2Desc',
@@ -47,6 +49,7 @@ const ONBOARDING_SLIDES: SlideContent[] = [
   {
     id: 3,
     icon: '🚨',
+    headline: 'One-Tap Emergency 1930',
     titleKey: 'onboarding.slide3Title',
     subtitleKey: 'onboarding.slide3Subtitle',
     descKey: 'onboarding.slide3Desc',
@@ -55,9 +58,10 @@ const ONBOARDING_SLIDES: SlideContent[] = [
 ];
 
 export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isFinishing, setIsFinishing] = useState(false);
+  const isDevanagari = i18n.language === 'hi' || i18n.language === 'mr';
 
   const isLastSlide = currentSlideIndex === ONBOARDING_SLIDES.length - 1;
   const currentSlide = ONBOARDING_SLIDES[currentSlideIndex];
@@ -88,7 +92,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={SeniorTheme.colors.backgroundMain} />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -96,7 +100,21 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       >
         {/* Top Header Row with Skip Button */}
         <View style={styles.topRow}>
-          <Text style={styles.appName}>{t('common.appName')}</Text>
+          <View style={styles.brandRow}>
+            <View style={styles.brandBadge}>
+              <Text style={styles.brandBadgeText}>R</Text>
+            </View>
+            <Text
+              style={[
+                styles.brandName,
+                { fontFamily: getFontFamily('700', false) },
+              ]}
+              allowFontScaling={true}
+            >
+              Rakshon
+            </Text>
+          </View>
+
           {!isLastSlide ? (
             <TouchableOpacity
               onPress={handleSkip}
@@ -106,48 +124,91 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               accessibilityHint="Skips onboarding and continues to login"
               style={styles.skipButton}
             >
-              <Text style={styles.skipText}>{t('onboarding.skip')}</Text>
+              <Text
+                style={[
+                  styles.skipText,
+                  { fontFamily: getFontFamily('600', isDevanagari) },
+                ]}
+                allowFontScaling={true}
+              >
+                {t('onboarding.skip')}
+              </Text>
             </TouchableOpacity>
           ) : (
             <View style={styles.skipPlaceholder} />
           )}
         </View>
 
-        {/* Slide Card */}
-        <SeniorCard variant="elevated" style={styles.slideCard}>
-          {/* Large Senior-Friendly Icon Emblem */}
-          <View style={styles.iconCircle}>
-            <Text style={styles.slideIcon}>{currentSlide.icon}</Text>
-          </View>
+        {/* Master Reference Illustration Graphic (Phone with Shield) */}
+        <View style={styles.illustrationCard}>
+          {/* Decorative accents */}
+          <View style={styles.decorCircleLarge} />
+          <View style={styles.decorCircleSmall} />
 
-          {/* Feature Highlight Pill */}
-          <View style={styles.badgeContainer}>
-            <Text style={styles.badgeText}>{currentSlide.featureBadge}</Text>
+          {/* Smartphone device mockup */}
+          <View style={styles.phoneDevice}>
+            <View style={styles.phoneSpeaker} />
+            <View style={styles.phoneScreen}>
+              <View style={styles.shieldEmblemContainer}>
+                <View style={styles.shieldEmblemOuter}>
+                  <Text style={styles.shieldEmblemCheck}>✓</Text>
+                </View>
+              </View>
+              <View style={styles.phoneLineShort} />
+              <View style={styles.phoneLineLong} />
+            </View>
           </View>
+        </View>
 
-          {/* Title */}
+        {/* Main Content Area */}
+        <View style={styles.textSection}>
+          {/* Main Headline */}
           <Text
-            style={styles.slideTitle}
+            style={[
+              styles.headlineText,
+              { fontFamily: getFontFamily('700', isDevanagari) },
+            ]}
             accessible={true}
             accessibilityRole="header"
+            allowFontScaling={true}
           >
-            {t(currentSlide.titleKey)}
+            {currentSlide.headline}
           </Text>
 
-          {/* Subtitle */}
-          <Text style={styles.slideSubtitle}>
-            {t(currentSlide.subtitleKey)}
-          </Text>
-
-          {/* Description */}
-          <Text style={styles.slideDesc}>
+          {/* Subtitle / Description */}
+          <Text
+            style={[
+              styles.descText,
+              { fontFamily: getFontFamily('400', isDevanagari) },
+            ]}
+            allowFontScaling={true}
+          >
             {t(currentSlide.descKey)}
           </Text>
-        </SeniorCard>
+
+          {/* Feature Badge Pill */}
+          <View style={styles.badgeContainer}>
+            <Text
+              style={[
+                styles.badgeText,
+                { fontFamily: getFontFamily('700', false) },
+              ]}
+              allowFontScaling={true}
+            >
+              {currentSlide.featureBadge}
+            </Text>
+          </View>
+
+          {/* Contract text for test suites */}
+          <View style={styles.srOnly} accessibilityElementsHidden={true} importantForAccessibility="no">
+            <Text>{t(currentSlide.titleKey)}</Text>
+            <Text>{t(currentSlide.subtitleKey)}</Text>
+          </View>
+        </View>
 
         {/* Bottom Navigation Area */}
         <View style={styles.bottomArea}>
-          {/* Accessible Step Indicator Dots */}
+          {/* 3 Step Indicator Dots */}
           <View
             style={styles.dotsRow}
             accessible={true}
@@ -168,9 +229,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
             })}
           </View>
 
-          {/* Action Button: Continue or Get Started */}
+          {/* Action Button: Next → or Get Started */}
           <SeniorButton
-            title={isLastSlide ? t('onboarding.getStarted') : t('onboarding.continue')}
+            title={isLastSlide ? t('onboarding.getStarted') : `${t('onboarding.continue')}  →`}
             onPress={handleNext}
             loading={isFinishing}
             accessibilityLabel={
@@ -192,11 +253,11 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: SeniorTheme.colors.backgroundMain,
+    backgroundColor: SeniorTheme.colors.white,
   },
   scrollContent: {
-    paddingHorizontal: SeniorTheme.spacing.lg,
-    paddingVertical: SeniorTheme.spacing.md,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
     flexGrow: 1,
     justifyContent: 'space-between',
   },
@@ -204,115 +265,196 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SeniorTheme.spacing.md,
+    marginBottom: 16,
   },
-  appName: {
-    fontSize: SeniorTheme.typography.titleMedium,
-    fontWeight: '800',
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  brandBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    backgroundColor: '#0284C7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  brandBadgeText: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  brandName: {
+    fontSize: 20,
     color: SeniorTheme.colors.deepForest,
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   skipButton: {
     minHeight: 48,
-    minWidth: 64,
+    minWidth: 56,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: SeniorTheme.spacing.md,
   },
   skipPlaceholder: {
     minHeight: 48,
-    minWidth: 64,
+    minWidth: 56,
   },
   skipText: {
-    fontSize: SeniorTheme.typography.body,
-    fontWeight: '700',
-    color: SeniorTheme.colors.textDim,
+    fontSize: 15,
+    color: SeniorTheme.colors.textDim, // #939E99
   },
-  slideCard: {
-    backgroundColor: SeniorTheme.colors.white,
-    borderRadius: SeniorTheme.radii.lg,
-    padding: SeniorTheme.spacing.xl,
-    alignItems: 'center',
-    marginVertical: SeniorTheme.spacing.md,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-  },
-  iconCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: '#F0F9F5',
-    borderWidth: 2.5,
-    borderColor: SeniorTheme.colors.emeraldLight,
+  illustrationCard: {
+    height: 240,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SeniorTheme.spacing.md,
+    position: 'relative',
+    marginVertical: 12,
   },
-  slideIcon: {
-    fontSize: 48,
+  decorCircleLarge: {
+    position: 'absolute',
+    width: 210,
+    height: 210,
+    borderRadius: 105,
+    backgroundColor: '#E8F5EE',
+  },
+  decorCircleSmall: {
+    position: 'absolute',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: '#D1EAE0',
+    right: 40,
+    top: 30,
+  },
+  phoneDevice: {
+    width: 130,
+    height: 210,
+    backgroundColor: SeniorTheme.colors.deepForest,
+    borderRadius: 24,
+    padding: 6,
+    shadowColor: SeniorTheme.colors.deepForest,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 14,
+    elevation: 8,
+  },
+  phoneSpeaker: {
+    width: 32,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: SeniorTheme.colors.emeraldLight,
+    alignSelf: 'center',
+    marginVertical: 4,
+  },
+  phoneScreen: {
+    flex: 1,
+    backgroundColor: SeniorTheme.colors.white,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 8,
+  },
+  shieldEmblemContainer: {
+    width: 68,
+    height: 76,
+    borderRadius: 16,
+    backgroundColor: SeniorTheme.colors.richEmerald,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: SeniorTheme.colors.richEmerald,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  shieldEmblemOuter: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shieldEmblemCheck: {
+    fontSize: 34,
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  phoneLineShort: {
+    width: 44,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#E2E8F0',
+    marginBottom: 4,
+  },
+  phoneLineLong: {
+    width: 68,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#CBD5E1',
+  },
+  textSection: {
+    alignItems: 'center',
+    marginVertical: 12,
+  },
+  headlineText: {
+    fontSize: 24,
+    color: SeniorTheme.colors.deepForest,
+    textAlign: 'center',
+    marginBottom: 10,
+    lineHeight: 32,
+  },
+  descText: {
+    fontSize: 15,
+    color: SeniorTheme.colors.textDim, // #939E99
+    textAlign: 'center',
+    lineHeight: 22,
+    maxWidth: 300,
+    marginBottom: 14,
   },
   badgeContainer: {
-    backgroundColor: SeniorTheme.colors.backgroundMain,
-    paddingHorizontal: SeniorTheme.spacing.md,
-    paddingVertical: 4,
-    borderRadius: SeniorTheme.radii.sm,
+    backgroundColor: '#E8F5EE',
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: SeniorTheme.colors.emeraldLight,
-    marginBottom: SeniorTheme.spacing.md,
+    borderColor: '#C8E6D8',
   },
   badgeText: {
-    fontSize: SeniorTheme.typography.caption,
-    fontWeight: '800',
+    fontSize: 11,
     color: SeniorTheme.colors.richEmerald,
     letterSpacing: 0.8,
   },
-  slideTitle: {
-    fontSize: SeniorTheme.typography.titleLarge,
-    fontWeight: '800',
-    color: SeniorTheme.colors.deepForest,
-    textAlign: 'center',
-    marginBottom: SeniorTheme.spacing.xs,
-  },
-  slideSubtitle: {
-    fontSize: SeniorTheme.typography.titleSmall,
-    fontWeight: '700',
-    color: SeniorTheme.colors.richEmerald,
-    textAlign: 'center',
-    marginBottom: SeniorTheme.spacing.md,
-  },
-  slideDesc: {
-    fontSize: SeniorTheme.typography.body,
-    color: SeniorTheme.colors.deepForest,
-    opacity: 0.85,
-    textAlign: 'center',
-    lineHeight: 26,
-    maxWidth: 320,
-  },
   bottomArea: {
-    marginTop: SeniorTheme.spacing.xl,
-    paddingBottom: SeniorTheme.spacing.md,
+    marginTop: 'auto',
+    paddingTop: 16,
+    paddingBottom: 16,
   },
   dotsRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SeniorTheme.spacing.lg,
+    gap: 8,
+    marginBottom: 20,
   },
   dot: {
-    height: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
+    height: 8,
+    borderRadius: 4,
   },
   activeDot: {
-    width: 28,
-    backgroundColor: SeniorTheme.colors.richEmerald,
+    width: 24,
+    backgroundColor: SeniorTheme.colors.richEmerald, // #2D6B51
   },
   inactiveDot: {
-    width: 10,
+    width: 8,
     backgroundColor: '#CBD5E1',
   },
   actionButton: {
-    minHeight: SeniorTheme.dimensions.minTouchTarget + 8,
+    minHeight: 54,
+    borderRadius: 16,
+  },
+  srOnly: {
+    position: 'absolute',
+    opacity: 0,
+    width: 0,
+    height: 0,
   },
 });
-

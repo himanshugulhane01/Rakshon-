@@ -6,12 +6,12 @@ import {
   StyleSheet,
   StatusBar,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { SeniorTheme } from '../theme';
+import { SeniorTheme, getFontFamily } from '../theme';
 import { SeniorButton } from '../components/SeniorButton';
 import { SeniorHeader } from '../components/SeniorHeader';
-import { SeniorCard } from '../components/SeniorCard';
 import { StorageService } from '../services/storage';
 
 export type SupportedLanguage = 'en' | 'hi' | 'mr';
@@ -27,7 +27,7 @@ interface LanguageItem {
   name: string;
   nativeName: string;
   greeting: string;
-  icon: string;
+  flag: string;
 }
 
 const LANGUAGES: LanguageItem[] = [
@@ -36,21 +36,21 @@ const LANGUAGES: LanguageItem[] = [
     name: 'English',
     nativeName: 'English',
     greeting: 'Welcome & Stay Safe',
-    icon: '🗣️',
+    flag: '🇬🇧',
   },
   {
     code: 'hi',
     name: 'Hindi',
     nativeName: 'हिंदी',
     greeting: 'स्वागत है और सुरक्षित रहें',
-    icon: '🇮🇳',
+    flag: '🇮🇳',
   },
   {
     code: 'mr',
     name: 'Marathi',
     nativeName: 'मराठी',
     greeting: 'स्वागत आणि सुरक्षित राहा',
-    icon: '🚩',
+    flag: '🚩',
   },
 ];
 
@@ -64,6 +64,7 @@ export const LanguageSelectionScreen: React.FC<LanguageSelectionScreenProps> = (
     (i18n.language as SupportedLanguage) || 'en'
   );
   const [isSaving, setIsSaving] = useState(false);
+  const isDevanagari = selectedLang === 'hi' || selectedLang === 'mr';
 
   useEffect(() => {
     const current = i18n.language;
@@ -92,7 +93,7 @@ export const LanguageSelectionScreen: React.FC<LanguageSelectionScreenProps> = (
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={SeniorTheme.colors.backgroundMain} />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {!isInitialSetup && (
         <SeniorHeader
@@ -105,83 +106,103 @@ export const LanguageSelectionScreen: React.FC<LanguageSelectionScreenProps> = (
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header Branding Area */}
+        {/* Header Icon Badge: Green Speech Bubble matching Mockup #3 */}
         <View style={styles.headerArea}>
-          <View style={styles.logoBadge}>
-            <Text style={styles.logoIcon}>🌐</Text>
+          <View style={styles.speechBadge}>
+            <Text style={styles.speechBadgeIcon}>💬</Text>
           </View>
-          <Text style={styles.title} accessible={true} accessibilityRole="header">
-            {t('languageSelect.title')}
+
+          <Text
+            style={[
+              styles.title,
+              { fontFamily: getFontFamily('700', isDevanagari) },
+            ]}
+            accessible={true}
+            accessibilityRole="header"
+            allowFontScaling={true}
+          >
+            Choose Your Language
           </Text>
-          <Text style={styles.subtitle}>
-            {t('languageSelect.subtitle')}
+          <Text
+            style={[
+              styles.subtitle,
+              { fontFamily: getFontFamily('400', isDevanagari) },
+            ]}
+            allowFontScaling={true}
+          >
+            Pick your preferred language to continue
           </Text>
         </View>
 
-        {/* Trilingual Selection Cards reusing SeniorCard */}
+        {/* 3 Trilingual Selection Cards */}
         <View style={styles.optionsList}>
           {LANGUAGES.map((lang) => {
             const isSelected = selectedLang === lang.code;
+            const itemIsDev = lang.code === 'hi' || lang.code === 'mr';
 
             return (
-              <SeniorCard
+              <TouchableOpacity
                 key={lang.code}
-                variant={isSelected ? 'accent' : 'outlined'}
                 onPress={() => handleSelectLanguage(lang.code)}
+                accessible={true}
+                accessibilityRole="button"
                 accessibilityLabel={`${lang.nativeName} (${lang.name})`}
                 accessibilityHint={`Selects ${lang.name} as application language`}
+                activeOpacity={0.8}
                 style={[
                   styles.languageCard,
                   isSelected && styles.languageCardSelected,
                 ]}
               >
-                <View style={styles.cardInner}>
+                <View style={styles.cardContent}>
                   <View style={styles.cardLeft}>
-                    <View
-                      style={[
-                        styles.iconCircle,
-                        isSelected && styles.iconCircleSelected,
-                      ]}
-                    >
-                      <Text style={styles.langIcon}>{lang.icon}</Text>
+                    <View style={styles.flagBadge}>
+                      <Text style={styles.flagIcon}>{lang.flag}</Text>
                     </View>
                     <View style={styles.textColumn}>
                       <Text
                         style={[
                           styles.nativeNameText,
+                          { fontFamily: getFontFamily('700', itemIsDev) },
                           isSelected && styles.nativeNameTextSelected,
                         ]}
+                        allowFontScaling={true}
                       >
                         {lang.nativeName}
                       </Text>
-                      <Text style={styles.englishNameText}>
-                        {lang.name}
-                      </Text>
-                      <Text style={styles.greetingText}>
-                        {lang.greeting}
-                      </Text>
+                      {lang.code !== 'en' && (
+                        <Text
+                          style={[
+                            styles.englishSubtext,
+                            { fontFamily: getFontFamily('500', false) },
+                          ]}
+                          allowFontScaling={true}
+                        >
+                          {lang.name}
+                        </Text>
+                      )}
                     </View>
                   </View>
 
-                  {/* Radio / Checkmark Indicator */}
+                  {/* Radio Button Indicator matching Mockup #3 */}
                   <View
                     style={[
-                      styles.radioIndicator,
-                      isSelected && styles.radioIndicatorSelected,
+                      styles.radioCircle,
+                      isSelected && styles.radioCircleSelected,
                     ]}
                   >
-                    {isSelected && <Text style={styles.checkText}>✓</Text>}
+                    {isSelected && <View style={styles.radioDot} />}
                   </View>
                 </View>
-              </SeniorCard>
+              </TouchableOpacity>
             );
           })}
         </View>
 
-        {/* Reusable SeniorButton for Confirmation */}
+        {/* Confirmation Button */}
         <View style={styles.buttonContainer}>
           <SeniorButton
-            title={t('languageSelect.confirmButton')}
+            title="Continue"
             onPress={handleConfirm}
             loading={isSaving}
             accessibilityLabel={t('languageSelect.confirmButton')}
@@ -197,137 +218,136 @@ export const LanguageSelectionScreen: React.FC<LanguageSelectionScreenProps> = (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: SeniorTheme.colors.backgroundMain,
+    backgroundColor: SeniorTheme.colors.white,
   },
   scrollContent: {
-    paddingHorizontal: SeniorTheme.spacing.lg,
-    paddingVertical: SeniorTheme.spacing.xl,
+    paddingHorizontal: 24,
+    paddingVertical: 20,
     flexGrow: 1,
     justifyContent: 'space-between',
   },
   headerArea: {
     alignItems: 'center',
-    marginBottom: SeniorTheme.spacing.xl,
+    marginTop: 16,
+    marginBottom: 28,
   },
-  logoBadge: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: SeniorTheme.colors.white,
+  speechBadge: {
+    width: 68,
+    height: 68,
+    borderRadius: 22,
+    backgroundColor: '#E8F5EE',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: SeniorTheme.colors.emeraldLight,
-    marginBottom: SeniorTheme.spacing.md,
-    shadowColor: SeniorTheme.colors.deepForest,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    marginBottom: 18,
+    borderWidth: 1.5,
+    borderColor: '#C8E6D8',
   },
-  logoIcon: {
-    fontSize: 36,
+  speechBadgeIcon: {
+    fontSize: 32,
   },
   title: {
-    fontSize: SeniorTheme.typography.titleLarge,
-    fontWeight: '800',
+    fontSize: 26,
     color: SeniorTheme.colors.deepForest,
+    marginBottom: 8,
     textAlign: 'center',
-    marginBottom: SeniorTheme.spacing.sm,
+    letterSpacing: -0.3,
   },
   subtitle: {
-    fontSize: SeniorTheme.typography.body,
-    color: SeniorTheme.colors.deepForest,
-    opacity: 0.85,
+    fontSize: 15,
+    color: SeniorTheme.colors.textDim, // #939E99
     textAlign: 'center',
-    lineHeight: 24,
-    maxWidth: 320,
+    maxWidth: 280,
+    lineHeight: 22,
   },
   optionsList: {
-    marginVertical: SeniorTheme.spacing.sm,
+    gap: 14,
+    marginBottom: 28,
   },
   languageCard: {
-    minHeight: 80,
-    marginVertical: SeniorTheme.spacing.xs,
+    backgroundColor: SeniorTheme.colors.white,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    minHeight: 74,
+    justifyContent: 'center',
+    shadowColor: SeniorTheme.colors.deepForest,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   languageCardSelected: {
-    backgroundColor: '#F0F9F5',
+    borderColor: SeniorTheme.colors.richEmerald, // #2D6B51
+    backgroundColor: '#F4FAF7',
+    borderWidth: 2,
   },
-  cardInner: {
+  cardContent: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   cardLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    gap: 16,
   },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: SeniorTheme.colors.backgroundMain,
+  flagBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#F8FAFC',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: SeniorTheme.spacing.md,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  iconCircleSelected: {
-    backgroundColor: SeniorTheme.colors.white,
-    borderWidth: 1.5,
-    borderColor: SeniorTheme.colors.richEmerald,
-  },
-  langIcon: {
+  flagIcon: {
     fontSize: 24,
   },
   textColumn: {
-    flex: 1,
+    justifyContent: 'center',
   },
   nativeNameText: {
-    fontSize: SeniorTheme.typography.titleMedium,
-    fontWeight: '800',
+    fontSize: 19,
     color: SeniorTheme.colors.deepForest,
+    letterSpacing: 0.2,
   },
   nativeNameTextSelected: {
     color: SeniorTheme.colors.deepForest,
   },
-  englishNameText: {
-    fontSize: SeniorTheme.typography.bodySmall,
+  englishSubtext: {
+    fontSize: 13,
     color: SeniorTheme.colors.textDim,
     marginTop: 2,
-    fontWeight: '600',
   },
-  greetingText: {
-    fontSize: SeniorTheme.typography.caption,
-    color: SeniorTheme.colors.richEmerald,
-    marginTop: 2,
-    fontWeight: '600',
-  },
-  radioIndicator: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  radioCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     borderWidth: 2,
     borderColor: '#CBD5E1',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: SeniorTheme.spacing.md,
+  },
+  radioCircleSelected: {
+    borderColor: SeniorTheme.colors.richEmerald,
+    backgroundColor: SeniorTheme.colors.richEmerald,
+  },
+  radioDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: SeniorTheme.colors.white,
   },
-  radioIndicatorSelected: {
-    backgroundColor: SeniorTheme.colors.richEmerald,
-    borderColor: SeniorTheme.colors.richEmerald,
-  },
-  checkText: {
-    color: SeniorTheme.colors.white,
-    fontSize: 18,
-    fontWeight: '800',
-  },
   buttonContainer: {
-    marginTop: SeniorTheme.spacing.xl,
-    paddingBottom: SeniorTheme.spacing.lg,
+    marginTop: 'auto',
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   confirmButton: {
-    minHeight: SeniorTheme.dimensions.minTouchTarget + 8,
+    minHeight: 54,
+    borderRadius: 16,
   },
 });

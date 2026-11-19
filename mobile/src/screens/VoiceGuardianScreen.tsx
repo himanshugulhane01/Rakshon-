@@ -465,8 +465,9 @@ const styles = StyleSheet.create({
   },
   micCard: {
     alignItems: 'center',
-    marginBottom: SeniorTheme.spacing.xl,
+    marginBottom: SeniorTheme.spacing.lg,
     paddingVertical: SeniorTheme.spacing.xl,
+    borderRadius: SeniorTheme.radii.card,
   },
   micSubtitle: {
     fontSize: SeniorTheme.typography.body,
@@ -491,7 +492,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
-    borderColor: '#E8F5E9',
+    borderColor: SeniorTheme.colors.backgroundMain,
+    shadowColor: SeniorTheme.colors.deepForest,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
     elevation: 4,
   },
   largeMicButtonActive: {
@@ -500,7 +505,7 @@ const styles = StyleSheet.create({
   },
   largeMicButtonSpeaking: {
     backgroundColor: SeniorTheme.colors.emeraldLight,
-    borderColor: '#E8F5E9',
+    borderColor: SeniorTheme.colors.backgroundMain,
   },
   micIcon: {
     fontSize: 40,
@@ -527,18 +532,19 @@ const styles = StyleSheet.create({
   sampleChip: {
     backgroundColor: SeniorTheme.colors.backgroundMain,
     borderWidth: 1.5,
-    borderColor: SeniorTheme.colors.borderSubtle,
-    borderRadius: SeniorTheme.radii.full,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    borderColor: '#E2E8F0',
+    borderRadius: SeniorTheme.radii.button,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
   },
   sampleChipText: {
     fontSize: SeniorTheme.typography.bodySmall,
     color: SeniorTheme.colors.deepForest,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   transcriptionCard: {
-    marginBottom: SeniorTheme.spacing.xl,
+    marginBottom: SeniorTheme.spacing.lg,
+    borderRadius: SeniorTheme.radii.card,
   },
   sectionTitle: {
     fontSize: SeniorTheme.typography.titleSmall,
@@ -556,8 +562,10 @@ const styles = StyleSheet.create({
   errorContainer: {
     backgroundColor: '#FFEBEE',
     padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.button,
     marginBottom: SeniorTheme.spacing.md,
+    borderWidth: 1,
+    borderColor: SeniorTheme.colors.riskDangerBorder,
   },
   errorText: {
     fontSize: SeniorTheme.typography.bodySmall,
@@ -574,7 +582,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   resultCard: {
-    marginBottom: SeniorTheme.spacing.xl,
+    marginBottom: SeniorTheme.spacing.lg,
+    borderRadius: SeniorTheme.radii.card,
     borderLeftWidth: 6,
     borderLeftColor: SeniorTheme.colors.richEmerald,
   },
@@ -600,8 +609,10 @@ const styles = StyleSheet.create({
   actionsBox: {
     backgroundColor: SeniorTheme.colors.backgroundMain,
     padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.button,
     marginBottom: SeniorTheme.spacing.md,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   actionsHeader: {
     fontSize: SeniorTheme.typography.bodySmall,
@@ -625,8 +636,9 @@ const styles = StyleSheet.create({
     marginTop: SeniorTheme.spacing.md,
   },
   privacyCard: {
-    backgroundColor: '#F8FAFC',
-    borderColor: SeniorTheme.colors.borderSubtle,
+    backgroundColor: SeniorTheme.colors.white,
+    borderColor: '#E2E8F0',
+    borderRadius: SeniorTheme.radii.card,
     marginBottom: SeniorTheme.spacing.xl,
   },
   privacyHeading: {

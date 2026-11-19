@@ -18,14 +18,26 @@ import { SeniorCard } from '../components/SeniorCard';
 import { SeniorBadge } from '../components/SeniorBadge';
 import { SeniorDialog } from '../components/SeniorDialog';
 import { SeniorInput } from '../components/SeniorInput';
+import { BottomNavigation, BottomNavTab } from '../components/BottomNavigation';
 import { StorageService } from '../services/storage';
 
 export interface FamilyCircleScreenProps {
   onBack?: () => void;
+  onSelectTab?: (tab: BottomNavTab) => void;
 }
 
-export const FamilyCircleScreen: React.FC<FamilyCircleScreenProps> = ({ onBack }) => {
-  const { t } = useTranslation();
+export const FamilyCircleScreen: React.FC<FamilyCircleScreenProps> = ({ onBack, onSelectTab }) => {
+  const { t, i18n } = useTranslation();
+  const isDevanagari = i18n?.language === 'hi' || i18n?.language === 'mr';
+
+  const handleBottomTabSelect = (tab: BottomNavTab) => {
+    if (tab === 'family') return;
+    if (onSelectTab) {
+      onSelectTab(tab);
+    } else if (tab === 'home') {
+      onBack?.();
+    }
+  };
 
   const [pairingStatus, setPairingStatus] = useState<'ACTIVE' | 'PENDING' | 'NOT_PAIRED'>('NOT_PAIRED');
   const [caregiverName, setCaregiverName] = useState<string>('');
@@ -372,35 +384,57 @@ export const FamilyCircleScreen: React.FC<FamilyCircleScreenProps> = ({ onBack }
 
         {/* SECTION 2: Strict Privacy Guarantee Card */}
         <SeniorCard variant="elevated" style={styles.privacyCard}>
-          <Text style={styles.privacyCardTitle}>{`🛡️ ${t('familyCircle.privacyTitle')}`}</Text>
+          <View style={styles.privacyHeaderRow}>
+            <View style={styles.privacyShieldCircle}>
+              <Text style={styles.privacyShieldIcon}>🛡️</Text>
+            </View>
+            <View style={styles.privacyHeaderTitles}>
+              <Text style={styles.privacyCardTitle}>{`🛡️ ${t('familyCircle.privacyTitle')}`}</Text>
+              <Text style={styles.privacyZeroDataText}>Zero-Knowledge Privacy Architecture</Text>
+            </View>
+          </View>
 
           {/* What Caregiver Can See */}
-          <Text style={styles.privacySubHeading}>
-            {t('familyCircle.privacyWhatCaregiverSeesTitle')}
-          </Text>
-          <View style={styles.privacyBulletsBox}>
-            <Text style={styles.bulletItemGreen}>
-              {t('familyCircle.privacyWhatCaregiverSees1')}
-            </Text>
-            <Text style={styles.bulletItemGreen}>
-              {t('familyCircle.privacyWhatCaregiverSees2')}
-            </Text>
+          <View style={styles.privacySectionGroup}>
+            <View style={styles.privacySectionHeaderRow}>
+              <View style={styles.checkPillIcon}>
+                <Text style={styles.checkPillText}>✓</Text>
+              </View>
+              <Text style={styles.privacySubHeading}>
+                {t('familyCircle.privacyWhatCaregiverSeesTitle')}
+              </Text>
+            </View>
+            <View style={styles.privacyBulletsBox}>
+              <Text style={styles.bulletItemGreen}>
+                {t('familyCircle.privacyWhatCaregiverSees1')}
+              </Text>
+              <Text style={styles.bulletItemGreen}>
+                {t('familyCircle.privacyWhatCaregiverSees2')}
+              </Text>
+            </View>
           </View>
 
           {/* What Caregiver Can Never See */}
-          <Text style={styles.privacySubHeadingRed}>
-            {t('familyCircle.privacyWhatCaregiverNeverSeesTitle')}
-          </Text>
-          <View style={styles.privacyBulletsBoxRed}>
-            <Text style={styles.bulletItemRed}>
-              {t('familyCircle.privacyWhatCaregiverNeverSees1')}
-            </Text>
-            <Text style={styles.bulletItemRed}>
-              {t('familyCircle.privacyWhatCaregiverNeverSees2')}
-            </Text>
-            <Text style={styles.bulletItemRed}>
-              {t('familyCircle.privacyWhatCaregiverNeverSees3')}
-            </Text>
+          <View style={styles.privacySectionGroup}>
+            <View style={styles.privacySectionHeaderRow}>
+              <View style={styles.lockPillIcon}>
+                <Text style={styles.lockPillText}>🔒</Text>
+              </View>
+              <Text style={styles.privacySubHeadingRed}>
+                {t('familyCircle.privacyWhatCaregiverNeverSeesTitle')}
+              </Text>
+            </View>
+            <View style={styles.privacyBulletsBoxRed}>
+              <Text style={styles.bulletItemRed}>
+                {t('familyCircle.privacyWhatCaregiverNeverSees1')}
+              </Text>
+              <Text style={styles.bulletItemRed}>
+                {t('familyCircle.privacyWhatCaregiverNeverSees2')}
+              </Text>
+              <Text style={styles.bulletItemRed}>
+                {t('familyCircle.privacyWhatCaregiverNeverSees3')}
+              </Text>
+            </View>
           </View>
         </SeniorCard>
       </ScrollView>
@@ -416,6 +450,13 @@ export const FamilyCircleScreen: React.FC<FamilyCircleScreenProps> = ({ onBack }
         onConfirm={handleConfirmRevoke}
         onCancel={() => setIsRevokeDialogOpen(false)}
       />
+
+      {/* 5-Item Bottom Navigation */}
+      <BottomNavigation
+        activeTab="family"
+        onSelectTab={handleBottomTabSelect}
+        isDevanagari={isDevanagari}
+      />
     </SafeAreaView>
   );
 };
@@ -427,10 +468,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: SeniorTheme.spacing.lg,
-    paddingBottom: SeniorTheme.spacing.xxl,
+    paddingBottom: 48,
   },
   statusCard: {
     marginBottom: SeniorTheme.spacing.xl,
+    borderRadius: SeniorTheme.radii.card,
   },
   statusHeaderRow: {
     flexDirection: 'row',
@@ -441,7 +483,9 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: '#F0F9F5',
+    borderWidth: 1.5,
+    borderColor: SeniorTheme.colors.emeraldLight,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SeniorTheme.spacing.md,
@@ -481,16 +525,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.button,
     backgroundColor: SeniorTheme.colors.backgroundMain,
     borderWidth: 1.5,
-    borderColor: SeniorTheme.colors.borderSubtle,
+    borderColor: '#E2E8F0',
     marginBottom: SeniorTheme.spacing.md,
     minHeight: 52,
   },
   consentCheckboxRowActive: {
     borderColor: SeniorTheme.colors.richEmerald,
-    backgroundColor: SeniorTheme.colors.riskSafeSurface,
+    backgroundColor: '#F0F9F5',
   },
   checkboxIcon: {
     fontSize: 22,
@@ -506,7 +550,7 @@ const styles = StyleSheet.create({
   errorBox: {
     backgroundColor: '#FFEBEE',
     padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.sm,
+    borderRadius: SeniorTheme.radii.button,
     marginBottom: SeniorTheme.spacing.sm,
   },
   errorText: {
@@ -517,9 +561,9 @@ const styles = StyleSheet.create({
   codeContainer: {
     backgroundColor: SeniorTheme.colors.backgroundMain,
     padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.card,
     borderWidth: 1,
-    borderColor: SeniorTheme.colors.borderSubtle,
+    borderColor: '#E2E8F0',
     alignItems: 'center',
     marginTop: SeniorTheme.spacing.sm,
   },
@@ -533,7 +577,7 @@ const styles = StyleSheet.create({
     backgroundColor: SeniorTheme.colors.white,
     paddingVertical: 12,
     paddingHorizontal: 24,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.button,
     borderWidth: 2,
     borderColor: SeniorTheme.colors.richEmerald,
     marginBottom: SeniorTheme.spacing.sm,
@@ -566,9 +610,9 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: SeniorTheme.colors.white,
     padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.sm,
+    borderRadius: SeniorTheme.radii.button,
     borderWidth: 1,
-    borderColor: SeniorTheme.colors.borderSubtle,
+    borderColor: '#E2E8F0',
     marginVertical: SeniorTheme.spacing.sm,
   },
   cloudStatusHeading: {
@@ -585,9 +629,9 @@ const styles = StyleSheet.create({
   activeCaregiverBox: {
     backgroundColor: SeniorTheme.colors.backgroundMain,
     padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.card,
     borderWidth: 1,
-    borderColor: SeniorTheme.colors.borderSubtle,
+    borderColor: '#E2E8F0',
     marginTop: SeniorTheme.spacing.sm,
   },
   caregiverInfoRow: {
@@ -599,7 +643,9 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#E8F5E9',
+    backgroundColor: '#F0F9F5',
+    borderWidth: 1.5,
+    borderColor: SeniorTheme.colors.emeraldLight,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SeniorTheme.spacing.md,
@@ -632,9 +678,9 @@ const styles = StyleSheet.create({
   minimalSharingBox: {
     backgroundColor: SeniorTheme.colors.white,
     padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.sm,
+    borderRadius: SeniorTheme.radii.button,
     borderWidth: 1,
-    borderColor: SeniorTheme.colors.borderSubtle,
+    borderColor: '#E2E8F0',
     marginBottom: SeniorTheme.spacing.md,
   },
   minimalSharingHeading: {
@@ -658,48 +704,120 @@ const styles = StyleSheet.create({
     marginTop: SeniorTheme.spacing.xs,
   },
   privacyCard: {
-    backgroundColor: SeniorTheme.colors.cardBackground,
+    backgroundColor: '#FFFFFF',
     marginBottom: SeniorTheme.spacing.xl,
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    shadowColor: '#152720',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  privacyHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 6,
+  },
+  privacyShieldCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: '#DCFCE7',
+    borderWidth: 1.5,
+    borderColor: '#BBF7D0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  privacyShieldIcon: {
+    fontSize: 20,
+  },
+  privacyHeaderTitles: {
+    flex: 1,
   },
   privacyCardTitle: {
-    fontSize: SeniorTheme.typography.titleSmall,
+    fontSize: 16,
     fontWeight: '800',
     color: SeniorTheme.colors.deepForest,
-    marginBottom: SeniorTheme.spacing.md,
+  },
+  privacyZeroDataText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#16A34A',
+    marginTop: 2,
+  },
+  privacySectionGroup: {
+    marginTop: 14,
+  },
+  privacySectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  checkPillIcon: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#DCFCE7',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkPillText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#15803D',
+  },
+  lockPillIcon: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#FEE2E2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  lockPillText: {
+    fontSize: 12,
   },
   privacySubHeading: {
-    fontSize: SeniorTheme.typography.bodyLarge,
+    fontSize: 15,
     fontWeight: '800',
-    color: SeniorTheme.colors.riskSafe,
-    marginBottom: SeniorTheme.spacing.xs,
+    color: '#15803D',
   },
   privacyBulletsBox: {
-    backgroundColor: '#E8F5E9',
-    padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.sm,
-    marginBottom: SeniorTheme.spacing.md,
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1.5,
+    borderColor: '#BBF7D0',
+    padding: 14,
+    borderRadius: 14,
   },
   bulletItemGreen: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    color: SeniorTheme.colors.deepForest,
+    fontSize: 13,
+    color: '#14532D',
     lineHeight: 20,
+    fontWeight: '600',
     marginBottom: 6,
   },
   privacySubHeadingRed: {
-    fontSize: SeniorTheme.typography.bodyLarge,
+    fontSize: 15,
     fontWeight: '800',
-    color: SeniorTheme.colors.riskDanger,
-    marginBottom: SeniorTheme.spacing.xs,
+    color: '#B91C1C',
   },
   privacyBulletsBoxRed: {
-    backgroundColor: '#FFEBEE',
-    padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.sm,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1.5,
+    borderColor: '#FECACA',
+    padding: 14,
+    borderRadius: 14,
   },
   bulletItemRed: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    color: SeniorTheme.colors.deepForest,
+    fontSize: 13,
+    color: '#7F1D1D',
     lineHeight: 20,
+    fontWeight: '600',
     marginBottom: 6,
   },
 });

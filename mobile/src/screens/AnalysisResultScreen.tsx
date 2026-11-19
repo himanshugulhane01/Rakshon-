@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   },
   heroCard: {
     padding: SeniorTheme.spacing.lg,
-    borderRadius: SeniorTheme.radii.lg,
+    borderRadius: SeniorTheme.radii.card,
     borderWidth: 2,
     marginBottom: SeniorTheme.spacing.md,
   },
@@ -316,9 +316,11 @@ const styles = StyleSheet.create({
   },
   scoreContainer: {
     backgroundColor: SeniorTheme.colors.white,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.button,
     padding: SeniorTheme.spacing.md,
     marginTop: SeniorTheme.spacing.xs,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   scoreHeaderRow: {
     flexDirection: 'row',
@@ -355,6 +357,7 @@ const styles = StyleSheet.create({
   sectionCard: {
     padding: SeniorTheme.spacing.lg,
     marginBottom: SeniorTheme.spacing.md,
+    borderRadius: SeniorTheme.radii.card,
   },
   sectionTitle: {
     fontSize: SeniorTheme.typography.titleSmall,
@@ -407,7 +410,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#F0F9F5',
+    backgroundColor: SeniorTheme.colors.backgroundMain,
     borderWidth: 1.5,
     borderColor: SeniorTheme.colors.richEmerald,
     justifyContent: 'center',
@@ -429,8 +432,9 @@ const styles = StyleSheet.create({
   },
   disclaimerCard: {
     padding: SeniorTheme.spacing.md,
-    backgroundColor: '#F8FAFC',
-    borderColor: '#CBD5E1',
+    backgroundColor: SeniorTheme.colors.backgroundMain,
+    borderColor: '#E2E8F0',
+    borderRadius: SeniorTheme.radii.card,
     marginBottom: SeniorTheme.spacing.lg,
   },
   disclaimerHeader: {

@@ -8,7 +8,7 @@ import {
   TextStyle,
   StyleProp,
 } from 'react-native';
-import { SeniorTheme } from '../theme';
+import { SeniorTheme, getFontFamily } from '../theme';
 
 export interface SeniorButtonProps {
   title: string;
@@ -20,6 +20,7 @@ export interface SeniorButtonProps {
   accessibilityHint?: string;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
+  isDevanagari?: boolean;
 }
 
 export const SeniorButton: React.FC<SeniorButtonProps> = ({
@@ -32,6 +33,7 @@ export const SeniorButton: React.FC<SeniorButtonProps> = ({
   accessibilityHint,
   style,
   textStyle,
+  isDevanagari = false,
 }) => {
   const getBackgroundColor = () => {
     if (disabled) return SeniorTheme.colors.textDim;
@@ -68,6 +70,8 @@ export const SeniorButton: React.FC<SeniorButtonProps> = ({
     return 'transparent';
   };
 
+  const fontFamily = getFontFamily('600', isDevanagari);
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -90,9 +94,19 @@ export const SeniorButton: React.FC<SeniorButtonProps> = ({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={getTextColor()} size="large" />
+        <ActivityIndicator color={getTextColor()} size="small" />
       ) : (
-        <Text style={[styles.text, { color: getTextColor() }, textStyle]}>
+        <Text
+          style={[
+            styles.text,
+            {
+              color: getTextColor(),
+              fontFamily,
+            },
+            textStyle,
+          ]}
+          allowFontScaling={true}
+        >
           {title}
         </Text>
       )}
@@ -102,23 +116,23 @@ export const SeniorButton: React.FC<SeniorButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: SeniorTheme.dimensions.minTouchTarget,
-    height: SeniorTheme.dimensions.buttonHeight,
-    borderRadius: SeniorTheme.radii.md,
+    minHeight: SeniorTheme.dimensions.buttonHeight,
+    borderRadius: SeniorTheme.radii.button,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: SeniorTheme.spacing.lg,
-    marginVertical: SeniorTheme.spacing.sm,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    marginVertical: SeniorTheme.spacing.xs,
     shadowColor: SeniorTheme.colors.deepForest,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
     elevation: 2,
   },
   text: {
-    fontSize: SeniorTheme.typography.bodyLarge,
-    fontWeight: '700',
+    fontSize: SeniorTheme.typography.button,
+    fontWeight: '600',
     textAlign: 'center',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
 });

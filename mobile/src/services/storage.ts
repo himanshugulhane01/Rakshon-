@@ -24,6 +24,7 @@ const FORBIDDEN_STORAGE_KEYS = [/otp/i, /pin/i, /password/i, /passcode/i, /cvv/i
 export const PreferencesKeys = {
   APP_LANGUAGE: 'scamshield_pref_language',
   ONBOARDING_COMPLETED: 'scamshield_pref_onboarding_completed',
+  USER_FULL_NAME: 'rakshon_pref_user_full_name',
   HIGH_CONTRAST_ENABLED: 'scamshield_pref_high_contrast',
   CALL_SCREENING_ROLE_GRANTED: 'scamshield_pref_call_screening_role_granted',
   LAST_THREAT_SYNC_TIMESTAMP: 'scamshield_pref_last_threat_sync_timestamp',
@@ -342,6 +343,59 @@ export const StorageService = {
   async resetSimulatorProgress(): Promise<void> {
     await this.setPreference(PreferencesKeys.SCAM_SIMULATOR_COMPLETED_IDS, '[]');
     await this.setPreference(PreferencesKeys.SCAM_SIMULATOR_RESULTS, '[]');
+  },
+
+  // --- Dynamic User Profile & Session Methods ---
+  getUserProfileKey(userId: string): string {
+    const sanitized = (userId || 'anonymous').replace(/[^a-zA-Z0-9]/g, '_');
+    return `rakshon_user_profile_${sanitized}`;
+  },
+
+  async getUserFullNameForUser(userId: string): Promise<string> {
+    if (!userId) return '';
+    const scopedKey = this.getUserProfileKey(userId);
+    const scopedName = await this.getPreference(scopedKey, '');
+    if (scopedName) return scopedName;
+    return this.getPreference(PreferencesKeys.USER_FULL_NAME, '');
+  },
+
+  async setUserFullNameForUser(userId: string, name: string): Promise<void> {
+    const trimmed = name ? name.trim() : '';
+    if (userId) {
+      const scopedKey = this.getUserProfileKey(userId);
+      await this.setPreference(scopedKey, trimmed);
+    }
+    await this.setPreference(PreferencesKeys.USER_FULL_NAME, trimmed);
+  },
+
+  async getUserFullName(): Promise<string> {
+    const userPhone = await this.getSecureCredential(SecureKeys.USER_PHONE_HASH);
+    if (userPhone) {
+      const scopedName = await this.getPreference(this.getUserProfileKey(userPhone), '');
+      if (scopedName !== undefined && scopedName !== '') {
+        return scopedName;
+      }
+    }
+    return this.getPreference(PreferencesKeys.USER_FULL_NAME, '');
+  },
+
+  async setUserFullName(name: string): Promise<void> {
+    const trimmed = name ? name.trim() : '';
+    const userPhone = await this.getSecureCredential(SecureKeys.USER_PHONE_HASH);
+    if (userPhone) {
+      await this.setPreference(this.getUserProfileKey(userPhone), trimmed);
+    }
+    await this.setPreference(PreferencesKeys.USER_FULL_NAME, trimmed);
+  },
+
+  async hasActiveSession(): Promise<boolean> {
+    const phone = await this.getSecureCredential(SecureKeys.USER_PHONE_HASH);
+    return Boolean(phone);
+  },
+
+  async clearUserSession(): Promise<void> {
+    await this.clearSecureCredentials();
+    await this.setPreference(PreferencesKeys.USER_FULL_NAME, '');
   },
 
   // --- Secure Credentials ---

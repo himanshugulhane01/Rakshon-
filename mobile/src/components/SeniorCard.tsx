@@ -7,7 +7,7 @@ import {
   ViewStyle,
   StyleProp,
 } from 'react-native';
-import { SeniorTheme } from '../theme';
+import { SeniorTheme, getFontFamily } from '../theme';
 
 export interface SeniorCardProps {
   title?: string;
@@ -19,6 +19,7 @@ export interface SeniorCardProps {
   accessibilityHint?: string;
   style?: StyleProp<ViewStyle>;
   children?: React.ReactNode;
+  isDevanagari?: boolean;
 }
 
 export const SeniorCard: React.FC<SeniorCardProps> = ({
@@ -31,6 +32,7 @@ export const SeniorCard: React.FC<SeniorCardProps> = ({
   accessibilityHint,
   style,
   children,
+  isDevanagari = false,
 }) => {
   const isPressable = typeof onPress === 'function';
 
@@ -41,17 +43,20 @@ export const SeniorCard: React.FC<SeniorCardProps> = ({
       case 'accent':
         return SeniorTheme.colors.emeraldLight;
       default:
-        return 'transparent';
+        return '#E2E8F0';
     }
   };
+
+  const titleFont = getFontFamily('600', isDevanagari);
+  const subtitleFont = getFontFamily('400', isDevanagari);
 
   const content = (
     <View
       style={[
         styles.card,
         {
-          borderColor: variant === 'default' ? '#E2E8F0' : getBorderColor(),
-          borderWidth: variant === 'outlined' || variant === 'accent' ? 2 : 1,
+          borderColor: getBorderColor(),
+          borderWidth: variant === 'outlined' || variant === 'accent' ? 2 : 1.5,
         },
         variant === 'elevated' && styles.elevated,
         style,
@@ -61,8 +66,16 @@ export const SeniorCard: React.FC<SeniorCardProps> = ({
         <View style={styles.headerRow}>
           {Boolean(icon) && <View style={styles.iconContainer}>{icon}</View>}
           <View style={styles.textContainer}>
-            {Boolean(title) && <Text style={styles.title}>{title}</Text>}
-            {Boolean(subtitle) && <Text style={styles.subtitle}>{subtitle}</Text>}
+            {Boolean(title) && (
+              <Text style={[styles.title, { fontFamily: titleFont }]} allowFontScaling={true}>
+                {title}
+              </Text>
+            )}
+            {Boolean(subtitle) && (
+              <Text style={[styles.subtitle, { fontFamily: subtitleFont }]} allowFontScaling={true}>
+                {subtitle}
+              </Text>
+            )}
           </View>
         </View>
       )}
@@ -99,20 +112,20 @@ export const SeniorCard: React.FC<SeniorCardProps> = ({
 
 const styles = StyleSheet.create({
   pressableWrapper: {
-    marginVertical: SeniorTheme.spacing.sm,
+    marginVertical: SeniorTheme.spacing.xs,
   },
   card: {
     backgroundColor: SeniorTheme.colors.white,
-    borderRadius: SeniorTheme.radii.lg,
-    padding: SeniorTheme.spacing.lg,
+    borderRadius: SeniorTheme.radii.card,
+    padding: 18,
     marginVertical: SeniorTheme.spacing.xs,
   },
   elevated: {
     shadowColor: SeniorTheme.colors.deepForest,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 2,
   },
   headerRow: {
     flexDirection: 'row',
@@ -126,15 +139,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: SeniorTheme.typography.titleMedium,
-    fontWeight: '700',
+    fontSize: SeniorTheme.typography.cardTitle,
+    fontWeight: '600',
     color: SeniorTheme.colors.deepForest,
+    letterSpacing: -0.2,
   },
   subtitle: {
-    fontSize: SeniorTheme.typography.body,
-    color: SeniorTheme.colors.deepForest,
-    opacity: 0.8,
-    marginTop: SeniorTheme.spacing.xs,
-    lineHeight: 24,
+    fontSize: SeniorTheme.typography.helper,
+    color: '#64748B',
+    marginTop: 3,
+    lineHeight: 20,
   },
 });

@@ -598,6 +598,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 6,
     borderLeftColor: SeniorTheme.colors.riskDanger,
     marginBottom: SeniorTheme.spacing.xl,
+    borderRadius: SeniorTheme.radii.card,
   },
   helplineHeader: {
     flexDirection: 'row',
@@ -638,6 +639,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: SeniorTheme.colors.borderSubtle,
     marginBottom: SeniorTheme.spacing.xl,
+    borderRadius: SeniorTheme.radii.card,
   },
   guidanceTitle: {
     fontSize: SeniorTheme.typography.titleSmall,
@@ -658,7 +660,7 @@ const styles = StyleSheet.create({
   stepItem: {
     backgroundColor: SeniorTheme.colors.backgroundMain,
     padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.sm,
+    borderRadius: SeniorTheme.radii.button,
     borderLeftWidth: 4,
     borderLeftColor: SeniorTheme.colors.richEmerald,
   },
@@ -677,7 +679,7 @@ const styles = StyleSheet.create({
   warningBox: {
     backgroundColor: SeniorTheme.colors.riskDangerSurface,
     padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.sm,
+    borderRadius: SeniorTheme.radii.button,
     borderWidth: 1,
     borderColor: SeniorTheme.colors.riskDangerBorder,
     marginBottom: SeniorTheme.spacing.sm,
@@ -691,7 +693,7 @@ const styles = StyleSheet.create({
   disclaimerBox: {
     backgroundColor: SeniorTheme.colors.backgroundMain,
     padding: 10,
-    borderRadius: SeniorTheme.radii.sm,
+    borderRadius: SeniorTheme.radii.button,
     borderWidth: 1,
     borderColor: SeniorTheme.colors.borderSubtle,
   },
@@ -716,6 +718,7 @@ const styles = StyleSheet.create({
   },
   familyNoticeCard: {
     marginBottom: SeniorTheme.spacing.xl,
+    borderRadius: SeniorTheme.radii.card,
   },
   templateTabRow: {
     flexDirection: 'row',
@@ -726,7 +729,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 8,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.button,
     backgroundColor: SeniorTheme.colors.backgroundMain,
     borderWidth: 1.5,
     borderColor: SeniorTheme.colors.borderSubtle,
@@ -750,9 +753,11 @@ const styles = StyleSheet.create({
   },
   preparedNoticeBox: {
     marginTop: SeniorTheme.spacing.sm,
+    borderRadius: SeniorTheme.radii.button,
   },
   formCard: {
     marginBottom: SeniorTheme.spacing.xl,
+    borderRadius: SeniorTheme.radii.card,
   },
   fieldLabel: {
     fontSize: SeniorTheme.typography.bodySmall,
@@ -770,9 +775,9 @@ const styles = StyleSheet.create({
     backgroundColor: SeniorTheme.colors.backgroundMain,
     borderWidth: 1,
     borderColor: SeniorTheme.colors.borderSubtle,
-    borderRadius: SeniorTheme.radii.full,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    borderRadius: SeniorTheme.radii.button,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
   },
   quickChipActive: {
     backgroundColor: SeniorTheme.colors.richEmerald,
@@ -796,7 +801,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: SeniorTheme.colors.borderSubtle,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.button,
     marginBottom: SeniorTheme.spacing.xs,
     backgroundColor: SeniorTheme.colors.backgroundMain,
     minHeight: 48,

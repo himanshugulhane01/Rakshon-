@@ -9,7 +9,7 @@ import {
   ViewStyle,
   StyleProp,
 } from 'react-native';
-import { SeniorTheme } from '../theme';
+import { SeniorTheme, getFontFamily } from '../theme';
 
 export interface SeniorInputProps {
   label: string;
@@ -27,6 +27,7 @@ export interface SeniorInputProps {
   accessibilityLabel?: string;
   accessibilityHint?: string;
   style?: StyleProp<ViewStyle>;
+  isDevanagari?: boolean;
 }
 
 export const SeniorInput: React.FC<SeniorInputProps> = ({
@@ -45,6 +46,7 @@ export const SeniorInput: React.FC<SeniorInputProps> = ({
   accessibilityLabel,
   accessibilityHint,
   style,
+  isDevanagari = false,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(!secureTextEntry);
@@ -57,13 +59,18 @@ export const SeniorInput: React.FC<SeniorInputProps> = ({
     return '#CBD5E1';
   };
 
+  const labelFont = getFontFamily('600', isDevanagari);
+  const inputFont = getFontFamily('400', isDevanagari);
+  const helperFont = getFontFamily('400', isDevanagari);
+
   return (
     <View style={[styles.container, style]}>
       {/* Label */}
       <Text
-        style={styles.label}
+        style={[styles.label, { fontFamily: labelFont }]}
         accessible={true}
         accessibilityRole="text"
+        allowFontScaling={true}
       >
         {label}
       </Text>
@@ -95,9 +102,11 @@ export const SeniorInput: React.FC<SeniorInputProps> = ({
           accessible={true}
           accessibilityLabel={accessibilityLabel || label}
           accessibilityHint={accessibilityHint}
+          allowFontScaling={true}
           style={[
             styles.input,
             {
+              fontFamily: inputFont,
               textAlignVertical: multiline ? 'top' : 'center',
               color: editable ? SeniorTheme.colors.deepForest : SeniorTheme.colors.textDim,
             },
@@ -136,13 +145,17 @@ export const SeniorInput: React.FC<SeniorInputProps> = ({
       {/* Error Message */}
       {hasError && (
         <View style={styles.errorContainer} accessible={true} accessibilityLiveRegion="polite">
-          <Text style={styles.errorText}>{`⚠️ ${error}`}</Text>
+          <Text style={[styles.errorText, { fontFamily: helperFont }]} allowFontScaling={true}>
+            {`⚠️ ${error}`}
+          </Text>
         </View>
       )}
 
       {/* Helper Text (when no error) */}
       {!hasError && Boolean(helperText) && (
-        <Text style={styles.helperText}>{helperText}</Text>
+        <Text style={[styles.helperText, { fontFamily: helperFont }]} allowFontScaling={true}>
+          {helperText}
+        </Text>
       )}
     </View>
   );
@@ -150,27 +163,27 @@ export const SeniorInput: React.FC<SeniorInputProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: SeniorTheme.spacing.sm,
+    marginVertical: SeniorTheme.spacing.xs,
     width: '100%',
   },
   label: {
-    fontSize: SeniorTheme.typography.body,
-    fontWeight: '700',
+    fontSize: SeniorTheme.typography.helper,
+    fontWeight: '600',
     color: SeniorTheme.colors.deepForest,
-    marginBottom: SeniorTheme.spacing.xs,
+    marginBottom: 6,
   },
   inputContainer: {
     backgroundColor: SeniorTheme.colors.white,
-    borderRadius: SeniorTheme.radii.md,
+    borderRadius: SeniorTheme.radii.input,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: SeniorTheme.spacing.md,
+    paddingHorizontal: 14,
   },
   input: {
     flex: 1,
-    fontSize: SeniorTheme.typography.bodyLarge,
-    fontWeight: '500',
-    paddingVertical: SeniorTheme.spacing.sm,
+    fontSize: SeniorTheme.typography.bodyRegular,
+    fontWeight: '400',
+    paddingVertical: 12,
   },
   iconButton: {
     minWidth: 48,
@@ -179,24 +192,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   clearIconText: {
-    fontSize: SeniorTheme.typography.titleSmall,
+    fontSize: 16,
     color: SeniorTheme.colors.textDim,
     fontWeight: '700',
   },
   toggleIconText: {
-    fontSize: SeniorTheme.typography.titleSmall,
+    fontSize: 18,
   },
   errorContainer: {
-    marginTop: SeniorTheme.spacing.xs,
+    marginTop: 4,
   },
   errorText: {
-    fontSize: SeniorTheme.typography.bodySmall,
+    fontSize: SeniorTheme.typography.metadata,
     color: SeniorTheme.colors.riskDanger,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   helperText: {
-    fontSize: SeniorTheme.typography.caption,
-    color: SeniorTheme.colors.textDim,
-    marginTop: SeniorTheme.spacing.xs,
+    fontSize: SeniorTheme.typography.metadata,
+    color: '#64748B',
+    marginTop: 4,
   },
 });

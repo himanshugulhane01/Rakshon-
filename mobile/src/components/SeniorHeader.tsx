@@ -6,7 +6,7 @@ import {
   StyleSheet,
   ViewStyle,
 } from 'react-native';
-import { SeniorTheme } from '../theme';
+import { SeniorTheme, getFontFamily } from '../theme';
 
 export interface SeniorHeaderProps {
   title: string;
@@ -14,6 +14,8 @@ export interface SeniorHeaderProps {
   onBack?: () => void;
   rightAction?: React.ReactNode;
   style?: ViewStyle;
+  accessibilityLabel?: string;
+  isDevanagari?: boolean;
 }
 
 export const SeniorHeader: React.FC<SeniorHeaderProps> = ({
@@ -22,7 +24,11 @@ export const SeniorHeader: React.FC<SeniorHeaderProps> = ({
   onBack,
   rightAction,
   style,
+  isDevanagari = false,
 }) => {
+  const titleFont = getFontFamily('600', isDevanagari);
+  const subtitleFont = getFontFamily('400', isDevanagari);
+
   return (
     <View style={[styles.headerContainer, style]}>
       <View style={styles.contentRow}>
@@ -45,13 +51,19 @@ export const SeniorHeader: React.FC<SeniorHeaderProps> = ({
           <Text
             accessible={true}
             accessibilityRole="header"
-            style={styles.titleText}
+            style={[styles.titleText, { fontFamily: titleFont }]}
             numberOfLines={2}
+            allowFontScaling={true}
           >
             {title}
           </Text>
           {Boolean(subtitle) && (
-            <Text style={styles.subtitleText}>{subtitle}</Text>
+            <Text
+              style={[styles.subtitleText, { fontFamily: subtitleFont }]}
+              allowFontScaling={true}
+            >
+              {subtitle}
+            </Text>
           )}
         </View>
 
@@ -67,8 +79,8 @@ export const SeniorHeader: React.FC<SeniorHeaderProps> = ({
 const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: SeniorTheme.colors.backgroundMain,
-    paddingHorizontal: SeniorTheme.spacing.md,
-    paddingVertical: SeniorTheme.spacing.sm,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#E2E8F0',
   },
@@ -78,34 +90,34 @@ const styles = StyleSheet.create({
     minHeight: SeniorTheme.dimensions.headerHeight,
   },
   backButton: {
-    minWidth: 48,
-    minHeight: 48,
+    width: 48,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: SeniorTheme.spacing.sm,
-    borderRadius: SeniorTheme.radii.sm,
+    marginRight: 14,
+    borderRadius: 14,
     backgroundColor: SeniorTheme.colors.white,
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
   },
   backArrowText: {
-    fontSize: 28,
-    fontWeight: '800',
+    fontSize: 24,
+    fontWeight: '700',
     color: SeniorTheme.colors.deepForest,
-    lineHeight: 32,
   },
   titleContainer: {
     flex: 1,
     justifyContent: 'center',
   },
   titleText: {
-    fontSize: SeniorTheme.typography.titleMedium,
-    fontWeight: '800',
+    fontSize: SeniorTheme.typography.screenTitle,
+    fontWeight: '600',
     color: SeniorTheme.colors.deepForest,
+    letterSpacing: -0.2,
   },
   subtitleText: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    color: SeniorTheme.colors.textDim,
+    fontSize: SeniorTheme.typography.helper,
+    color: '#64748B',
     marginTop: 2,
   },
   rightActionContainer: {

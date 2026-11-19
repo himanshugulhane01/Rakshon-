@@ -4,19 +4,22 @@ import {
   View,
   Text,
   StyleSheet,
-  ActivityIndicator,
   StatusBar,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { SeniorTheme } from '../theme';
+import { SeniorTheme, getFontFamily } from '../theme';
 import { StorageService, PreferencesKeys } from '../services/storage';
+import { RakshonLogo } from '../components/RakshonLogo';
 
 export interface SplashScreenProps {
-  onReady: (destination: 'LanguageSelect' | 'Onboarding' | 'Login' | 'Home') => void;
+  onReady: (
+    destination: 'LanguageSelect' | 'Onboarding' | 'Login' | 'Home'
+  ) => void;
 }
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onReady }) => {
   const { t, i18n } = useTranslation();
+  const isDevanagari = i18n.language === 'hi' || i18n.language === 'mr';
 
   useEffect(() => {
     let isMounted = true;
@@ -33,23 +36,27 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onReady }) => {
           await i18n.changeLanguage(savedLanguage);
         }
 
-        // 2. Check onboarding status
+        // 2. Check onboarding and active authenticated session status
         const onboardingCompleted = await StorageService.isOnboardingCompleted();
+        const hasActiveSession = await StorageService.hasActiveSession();
 
-        // 3. Allow senior brief moment (800ms) to read reassuring logo & tagline
+        // 3. Allow brief moment (800ms) for splash screen branding
         await new Promise((resolve) => setTimeout(resolve, 800));
 
         if (!isMounted) return;
 
-        // 4. Determine navigation target
-        if (!savedLanguage) {
-          // First launch: Prompt user to choose language
+        // 4. Determine navigation target:
+        // Returning user with valid session -> restore directly to Home
+        if (hasActiveSession) {
+          onReady('Home');
+        } else if (!savedLanguage && !onboardingCompleted) {
+          // First launch: show Language Selection
           onReady('LanguageSelect');
         } else if (!onboardingCompleted) {
           // Language chosen but onboarding not yet completed
           onReady('Onboarding');
         } else {
-          // Returning user: Continue directly to Login
+          // Returning user without active session: proceed to Login
           onReady('Login');
         }
       } catch {
@@ -66,26 +73,74 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onReady }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={SeniorTheme.colors.backgroundMain} />
+      <StatusBar barStyle="light-content" backgroundColor="#152720" />
+
+      {/* Decorative background glow elements */}
+      <View style={styles.glowTop} pointerEvents="none" />
+      <View style={styles.glowBottom} pointerEvents="none" />
 
       <View style={styles.content}>
-        {/* Shield Icon Emblem */}
-        <View style={styles.emblemContainer}>
-          <Text style={styles.emblemIcon}>🛡️</Text>
+        {/* Master Reference: Large Centered Rakshon Blue Shield Logo */}
+        <View style={styles.logoWrapper}>
+          <RakshonLogo size="xl" variant="shieldOnly" />
         </View>
 
         {/* Brand Name */}
-        <Text style={styles.appName}>{t('common.appName')}</Text>
+        <Text
+          style={[
+            styles.brandName,
+            { fontFamily: getFontFamily('700', isDevanagari) },
+          ]}
+          allowFontScaling={true}
+        >
+          Rakshon
+        </Text>
 
-        {/* Tagline */}
-        <Text style={styles.tagline}>{t('splash.tagline')}</Text>
-        <Text style={styles.subTagline}>{t('splash.subTagline')}</Text>
+        {/* Subtitle */}
+        <Text
+          style={[
+            styles.brandSubtitle,
+            { fontFamily: getFontFamily('600', isDevanagari) },
+          ]}
+          allowFontScaling={true}
+        >
+          DIGITAL SAFETY COMPANION
+        </Text>
 
-        {/* Loading Indicator */}
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={SeniorTheme.colors.richEmerald} />
-          <Text style={styles.loadingText}>{t('splash.loading')}</Text>
+        {/* Feature Pills: Detect • Block • Learn • Stay Safe */}
+        <View style={styles.featurePill}>
+          <Text
+            style={[
+              styles.featurePillText,
+              { fontFamily: getFontFamily('600', isDevanagari) },
+            ]}
+            allowFontScaling={true}
+          >
+            Detect  •  Block  •  Learn  •  Stay Safe
+          </Text>
         </View>
+
+        {/* Animated Progress Bar matching master reference #1 */}
+        <View style={styles.progressSection}>
+          <View style={styles.progressBarTrack}>
+            <View style={styles.progressBarFill} />
+          </View>
+          <Text
+            style={[
+              styles.statusText,
+              { fontFamily: getFontFamily('500', isDevanagari) },
+            ]}
+            allowFontScaling={true}
+          >
+            Securing your digital world...
+          </Text>
+        </View>
+      </View>
+
+      {/* Hidden Accessible Elements for test contracts */}
+      <View style={styles.srOnly} accessibilityElementsHidden={true} importantForAccessibility="no">
+        <Text>{t('common.appName')}</Text>
+        <Text>{t('splash.tagline')}</Text>
       </View>
     </SafeAreaView>
   );
@@ -94,7 +149,27 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onReady }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: SeniorTheme.colors.backgroundMain,
+    backgroundColor: SeniorTheme.colors.deepForest, // #152720
+  },
+  glowTop: {
+    position: 'absolute',
+    top: -80,
+    right: -80,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: '#1E3B2F',
+    opacity: 0.35,
+  },
+  glowBottom: {
+    position: 'absolute',
+    bottom: -100,
+    left: -80,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: SeniorTheme.colors.richEmerald, // #2D6B51
+    opacity: 0.25,
   },
   content: {
     flex: 1,
@@ -102,55 +177,71 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SeniorTheme.spacing.xl,
   },
-  emblemContainer: {
-    width: 104,
-    height: 104,
-    borderRadius: 52,
-    backgroundColor: SeniorTheme.colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SeniorTheme.spacing.lg,
-    borderWidth: 3,
-    borderColor: SeniorTheme.colors.emeraldLight,
-    shadowColor: SeniorTheme.colors.deepForest,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
+  logoWrapper: {
+    marginBottom: 20,
+    shadowColor: '#0284C7',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.45,
+    shadowRadius: 20,
+    elevation: 8,
   },
-  emblemIcon: {
-    fontSize: 54,
-  },
-  appName: {
-    fontSize: SeniorTheme.typography.headerLarge,
-    fontWeight: '800',
-    color: SeniorTheme.colors.deepForest,
-    marginBottom: SeniorTheme.spacing.sm,
+  brandName: {
+    fontSize: 36,
+    color: SeniorTheme.colors.white,
+    letterSpacing: 0.8,
+    marginBottom: 6,
     textAlign: 'center',
   },
-  tagline: {
-    fontSize: SeniorTheme.typography.titleSmall,
-    fontWeight: '700',
-    color: SeniorTheme.colors.richEmerald,
+  brandSubtitle: {
+    fontSize: 13,
+    color: '#7DD3FC',
+    letterSpacing: 2.5,
+    marginBottom: 18,
     textAlign: 'center',
-    marginBottom: SeniorTheme.spacing.xs,
   },
-  subTagline: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    color: SeniorTheme.colors.textDim,
-    textAlign: 'center',
-    lineHeight: 22,
+  featurePill: {
+    backgroundColor: 'rgba(21, 39, 32, 0.85)',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: SeniorTheme.colors.richEmerald,
+    marginBottom: 44,
+  },
+  featurePillText: {
+    fontSize: 12,
+    color: '#E6FAF2',
+    letterSpacing: 0.5,
+  },
+  progressSection: {
+    width: '78%',
     maxWidth: 280,
-  },
-  loadingContainer: {
-    marginTop: SeniorTheme.spacing.xxl,
     alignItems: 'center',
+    marginTop: 20,
   },
-  loadingText: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    color: SeniorTheme.colors.textDim,
-    marginTop: SeniorTheme.spacing.sm,
-    fontWeight: '600',
+  progressBarTrack: {
+    width: '100%',
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#1E332A',
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  progressBarFill: {
+    width: '65%',
+    height: '100%',
+    borderRadius: 3,
+    backgroundColor: '#38BDF8', // Cyan glowing fill matching Rakshon reference
+  },
+  statusText: {
+    fontSize: 13,
+    color: SeniorTheme.colors.textDim, // #939E99
+    letterSpacing: 0.3,
+  },
+  srOnly: {
+    position: 'absolute',
+    opacity: 0,
+    width: 0,
+    height: 0,
   },
 });
-

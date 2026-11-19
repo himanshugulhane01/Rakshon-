@@ -8,6 +8,7 @@
     "cancel": "Cancel",
     "back": "Back",
     "language": "Language",
+    "notifications": "Notifications",
     "help": "Need Help?",
     "loading": "Please wait...",
     "demoModeBadge": "Senior Security Demo"
@@ -54,6 +55,10 @@
   },
   "home": {
     "title": "Fraud Protection Dashboard",
+    "welcome": "Welcome",
+    "greetingWithName": "Namaste, {{name}}! 👋",
+    "greetingDefault": "Welcome to Rakshon! 👋",
+    "subtitle": "Your digital safety starts here. We're here to help you stay safe online.",
     "statusActive": "Active & Guarding",
     "statusSectionTitle": "Protection Status",
     "callGuardian": "Call Guardian",

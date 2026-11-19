@@ -10,13 +10,12 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  TextInput,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SeniorTheme } from '../theme';
 import { SeniorHeader } from '../components/SeniorHeader';
-import { SeniorCard } from '../components/SeniorCard';
 import { SeniorButton } from '../components/SeniorButton';
-import { SeniorInput } from '../components/SeniorInput';
 import { SeniorBadge } from '../components/SeniorBadge';
 import {
   QrScannerService,
@@ -33,14 +32,6 @@ export interface ScamLensScreenProps {
 }
 
 type InspectionTab = 'QR' | 'DOCUMENT';
-
-// Safe samples for senior learning
-const SAMPLE_SUSPICIOUS_UPI =
-  'upi://pay?pa=refund9823@okhdfcbank&pn=&am=4999&tn=Lottery_Cashback_Refund';
-const SAMPLE_PHISHING_URL =
-  'http://45.33.32.156/sbi-kyc-update/download/sbi-security.apk';
-const SAMPLE_ELECTRICITY_LETTER =
-  'Dear consumer, your electricity power will be cut tonight at 9:30 PM due to unpaid bill. Immediately contact power officer on 9876543210.';
 
 export const ScamLensScreen: React.FC<ScamLensScreenProps> = ({
   onBack,
@@ -117,83 +108,16 @@ export const ScamLensScreen: React.FC<ScamLensScreenProps> = ({
     }
   };
 
-  const getRiskBadgeScheme = (severity: 'SAFE' | 'CAUTION' | 'HIGH_RISK') => {
-    switch (severity) {
-      case 'HIGH_RISK':
-        return {
-          bg: SeniorTheme.colors.riskDangerSurface,
-          border: SeniorTheme.colors.riskDangerBorder,
-          text: SeniorTheme.colors.riskDanger,
-          variant: 'danger' as const,
-        };
-      case 'CAUTION':
-        return {
-          bg: SeniorTheme.colors.riskWarningSurface,
-          border: SeniorTheme.colors.riskWarningBorder,
-          text: SeniorTheme.colors.riskWarning,
-          variant: 'caution' as const,
-        };
-      default:
-        return {
-          bg: SeniorTheme.colors.riskSafeSurface,
-          border: SeniorTheme.colors.riskSafeBorder,
-          text: SeniorTheme.colors.riskSafe,
-          variant: 'safe' as const,
-        };
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={SeniorTheme.colors.backgroundMain} />
+      <StatusBar barStyle="light-content" backgroundColor="#152720" />
 
+      {/* Dark Forest Header matching Master Reference #9 */}
       <SeniorHeader
         title={t('scamLens.title')}
-        subtitle={t('scamLens.subtitle')}
         onBack={onBack}
+        accessibilityLabel="Scam Lens screen header"
       />
-
-      {/* Mode Navigation Tabs */}
-      <View style={styles.tabsRow}>
-        <TouchableOpacity
-          onPress={() => setActiveTab('QR')}
-          accessible={true}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: activeTab === 'QR' }}
-          accessibilityLabel={t('scamLens.tabQr')}
-          style={[styles.tabButton, activeTab === 'QR' && styles.tabButtonActive]}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'QR' && styles.tabTextActive,
-            ]}
-          >
-            🏁 {t('scamLens.tabQr')}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => setActiveTab('DOCUMENT')}
-          accessible={true}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: activeTab === 'DOCUMENT' }}
-          accessibilityLabel={t('scamLens.tabDocument')}
-          style={[
-            styles.tabButton,
-            activeTab === 'DOCUMENT' && styles.tabButtonActive,
-          ]}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'DOCUMENT' && styles.tabTextActive,
-            ]}
-          >
-            📄 {t('scamLens.tabDocument')}
-          </Text>
-        </TouchableOpacity>
-      </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -204,346 +128,257 @@ export const ScamLensScreen: React.FC<ScamLensScreenProps> = ({
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* TAB 1: QR CODE INSPECTOR */}
-          {activeTab === 'QR' && (
-            <View>
-              <SeniorCard variant="elevated" style={styles.card}>
-                <SeniorInput
-                  label={t('scamLens.qrInputLabel')}
-                  value={qrInput}
-                  onChangeText={(text) => {
-                    setQrInput(text);
-                    if (qrResult) setQrResult(null);
-                  }}
-                  placeholder={t('scamLens.qrInputPlaceholder')}
-                  multiline={true}
-                  numberOfLines={3}
-                  accessibilityLabel={t('scamLens.qrInputLabel')}
-                />
-
-                {/* Tool Buttons */}
-                <View style={styles.toolsRow}>
-                  <TouchableOpacity
-                    onPress={handlePasteQr}
-                    accessible={true}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('scamLens.pasteQrButton')}
-                    style={styles.toolBtn}
-                  >
-                    <Text style={styles.toolBtnText}>
-                      {t('scamLens.pasteQrButton')}
-                    </Text>
-                  </TouchableOpacity>
-
-                  {qrInput.length > 0 && (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setQrInput('');
-                        setQrResult(null);
-                      }}
-                      accessible={true}
-                      accessibilityRole="button"
-                      style={styles.clearBtn}
-                    >
-                      <Text style={styles.clearBtnText}>
-                        {t('scamLens.clearButton')}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-
-                {/* Educational Sample Shortcuts */}
-                <View style={styles.sampleContainer}>
-                  <Text style={styles.sampleTitle}>Practice Examples:</Text>
-                  <View style={styles.sampleBtnRow}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setQrInput(SAMPLE_SUSPICIOUS_UPI);
-                        setQrResult(null);
-                      }}
-                      style={styles.samplePill}
-                    >
-                      <Text style={styles.samplePillText}>
-                        {t('scamLens.sampleUpiButton')}
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setQrInput(SAMPLE_PHISHING_URL);
-                        setQrResult(null);
-                      }}
-                      style={styles.samplePill}
-                    >
-                      <Text style={styles.samplePillText}>
-                        {t('scamLens.sampleUrlButton')}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                {/* Inspect Button */}
-                <SeniorButton
-                  title={t('scamLens.inspectQrButton')}
-                  variant="primary"
-                  onPress={handleInspectQr}
-                  disabled={qrInput.trim().length === 0}
-                  accessibilityLabel={t('scamLens.inspectQrButton')}
-                  style={styles.primaryActionBtn}
-                />
-              </SeniorCard>
-
-              {/* QR Safety Inspection Result Card */}
-              {qrResult && (
-                <SeniorCard
-                  variant="elevated"
-                  style={[
-                    styles.resultCard,
-                    {
-                      backgroundColor: getRiskBadgeScheme(qrResult.riskSeverity).bg,
-                      borderColor: getRiskBadgeScheme(qrResult.riskSeverity).border,
-                    },
-                  ]}
-                >
-                  <View style={styles.resultHeaderRow}>
-                    <SeniorBadge
-                      variant={getRiskBadgeScheme(qrResult.riskSeverity).variant}
-                      label={qrResult.riskSeverity}
-                    />
-                    <Text
-                      style={[
-                        styles.resultTitle,
-                        { color: getRiskBadgeScheme(qrResult.riskSeverity).text },
-                      ]}
-                    >
-                      {qrResult.title}
-                    </Text>
-                  </View>
-
-                  <Text style={styles.resultSummary}>{qrResult.summary}</Text>
-
-                  {/* UPI Details Table if detected */}
-                  {qrResult.upiDetails && (
-                    <View style={styles.detailsBox}>
-                      {Boolean(qrResult.upiDetails.payeeName) && (
-                        <View style={styles.detailRow}>
-                          <Text style={styles.detailLabel}>
-                            {t('scamLens.upiNameLabel')}:
-                          </Text>
-                          <Text style={styles.detailValue}>
-                            {qrResult.upiDetails.payeeName}
-                          </Text>
-                        </View>
-                      )}
-                      <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>
-                          {t('scamLens.upiRecipientLabel')}:
-                        </Text>
-                        <Text style={styles.detailValue}>
-                          {qrResult.upiDetails.payeeAddress || 'Not specified'}
-                        </Text>
-                      </View>
-                      {Boolean(qrResult.upiDetails.amount) && (
-                        <View style={styles.detailRow}>
-                          <Text style={styles.detailLabel}>
-                            {t('scamLens.upiAmountLabel')}:
-                          </Text>
-                          <Text style={styles.detailValuePrice}>
-                            {`₹${qrResult.upiDetails.amount}`}
-                          </Text>
-                        </View>
-                      )}
-                      {Boolean(qrResult.upiDetails.transactionNote) && (
-                        <View style={styles.detailRow}>
-                          <Text style={styles.detailLabel}>
-                            {t('scamLens.upiNoteLabel')}:
-                          </Text>
-                          <Text style={styles.detailValue}>
-                            {qrResult.upiDetails.transactionNote}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  )}
-
-                  {/* Flagged Warning Reasons */}
-                  {qrResult.flaggedReasons.length > 0 && (
-                    <View style={styles.warningsBox}>
-                      <Text style={styles.warningBoxTitle}>
-                        ⚠️ Detected Red Flags:
-                      </Text>
-                      {qrResult.flaggedReasons.map((reason, idx) => (
-                        <Text key={idx} style={styles.warningItemText}>
-                          • {reason}
-                        </Text>
-                      ))}
-                    </View>
-                  )}
-
-                  {/* Mandatory Safety Advices */}
-                  <View style={styles.criticalNoticeBox}>
-                    <Text style={styles.criticalNoticeText}>
-                      🛑 {t('scamLens.noPaymentWarning')}
-                    </Text>
-                    <Text style={styles.safeNoticeText}>
-                      🔒 {t('scamLens.noAutoOpenNotice')}
-                    </Text>
-                  </View>
-                </SeniorCard>
-              )}
+          {/* Master Reference #9: Scan & Verify Hero Card */}
+          <View style={styles.heroCard}>
+            {/* Viewfinder Graphic with Corner Brackets */}
+            <View style={styles.viewfinderFrame}>
+              <View style={[styles.cornerBracket, styles.bracketTopLeft]} />
+              <View style={[styles.cornerBracket, styles.bracketTopRight]} />
+              <View style={[styles.cornerBracket, styles.bracketBottomLeft]} />
+              <View style={[styles.cornerBracket, styles.bracketBottomRight]} />
+              <View style={styles.viewfinderCenter}>
+                <Text style={styles.viewfinderIcon}>🔲</Text>
+              </View>
             </View>
-          )}
 
-          {/* TAB 2: PAPER DOCUMENT INSPECTOR */}
-          {activeTab === 'DOCUMENT' && (
-            <View>
-              {/* OCR Availability Notice */}
-              <SeniorCard variant="outlined" style={styles.noticeCard}>
-                <Text style={styles.noticeText}>
-                  ℹ️ {t('scamLens.ocrUnavailableNotice')}
-                </Text>
-              </SeniorCard>
+            <Text style={styles.heroHeadline}>Scan & Verify</Text>
+            <Text style={styles.heroSubtitle}>
+              Check QR codes, documents and payment links for safety
+            </Text>
+          </View>
 
-              <SeniorCard variant="elevated" style={styles.card}>
-                <SeniorInput
-                  label={t('scamLens.documentInputLabel')}
-                  value={docInput}
-                  onChangeText={(text) => {
-                    setDocInput(text);
-                    if (docResult) setDocResult(null);
-                    if (docError) setDocError(null);
-                  }}
-                  placeholder={t('scamLens.documentInputPlaceholder')}
-                  multiline={true}
-                  numberOfLines={5}
-                  accessibilityLabel={t('scamLens.documentInputLabel')}
-                />
+          {/* Master Reference #9: Two Primary Feature Cards */}
+          <View style={styles.featureCardsRow}>
+            {/* 1. Scan QR Code Card */}
+            <TouchableOpacity
+              onPress={() => setActiveTab('QR')}
+              style={[
+                styles.featureCard,
+                activeTab === 'QR' && styles.featureCardSelected,
+              ]}
+              accessible={true}
+              accessibilityRole="tab"
+              accessibilityLabel="QR Code Inspector"
+              activeOpacity={0.8}
+            >
+              <View style={styles.cardLeftCol}>
+                <View style={styles.featureIconBadge}>
+                  <Text style={styles.featureIcon}>🔲</Text>
+                </View>
+                <View style={styles.featureTextCol}>
+                  <Text style={styles.featureTitle}>Scan QR Code</Text>
+                  <Text style={styles.featureSub}>Check payment or login QRs</Text>
+                </View>
+              </View>
+              <Text style={styles.featureArrow}>→</Text>
+            </TouchableOpacity>
 
-                {/* Paste & Sample Buttons */}
-                <View style={styles.toolsRow}>
-                  <TouchableOpacity
-                    onPress={handlePasteDoc}
-                    accessible={true}
-                    accessibilityRole="button"
-                    style={styles.toolBtn}
-                  >
-                    <Text style={styles.toolBtnText}>📋 Paste Text</Text>
-                  </TouchableOpacity>
+            {/* 2. Inspect Document Card */}
+            <TouchableOpacity
+              onPress={() => setActiveTab('DOCUMENT')}
+              style={[
+                styles.featureCard,
+                activeTab === 'DOCUMENT' && styles.featureCardSelected,
+              ]}
+              accessible={true}
+              accessibilityRole="tab"
+              accessibilityLabel="Paper Letter / Notice"
+              activeOpacity={0.8}
+            >
+              <View style={styles.cardLeftCol}>
+                <View style={styles.featureIconBadge}>
+                  <Text style={styles.featureIcon}>📄</Text>
+                </View>
+                <View style={styles.featureTextCol}>
+                  <Text style={styles.featureTitle}>Inspect Document</Text>
+                  <Text style={styles.featureSub}>Analyze bills, screenshots, and notices</Text>
+                </View>
+              </View>
+              <Text style={styles.featureArrow}>→</Text>
+            </TouchableOpacity>
+          </View>
 
+          {/* TAB 1: QR CODE INSPECTION PANEL */}
+          {activeTab === 'QR' && (
+            <View style={styles.panelCard}>
+              <Text style={styles.panelTitle}>QR Code Inspector</Text>
+              <TextInput
+                value={qrInput}
+                onChangeText={(text) => {
+                  setQrInput(text);
+                  if (qrResult) setQrResult(null);
+                }}
+                placeholder="Paste or enter decoded QR text (UPI link or website URL)..."
+                placeholderTextColor="#94A3B8"
+                multiline={true}
+                numberOfLines={3}
+                style={styles.panelTextInput}
+                accessibilityLabel={t('scamLens.qrInputLabel')}
+              />
+
+              <View style={styles.toolsRow}>
+                <TouchableOpacity
+                  onPress={handlePasteQr}
+                  style={styles.toolBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel="📋 Paste Decoded QR"
+                >
+                  <Text style={styles.toolBtnText}>📋 Paste Text</Text>
+                </TouchableOpacity>
+
+                {qrInput.length > 0 && (
                   <TouchableOpacity
                     onPress={() => {
-                      setDocInput(SAMPLE_ELECTRICITY_LETTER);
-                      setDocResult(null);
+                      setQrInput('');
+                      setQrResult(null);
                     }}
-                    style={styles.samplePill}
+                    style={styles.clearBtn}
                   >
-                    <Text style={styles.samplePillText}>
-                      {t('scamLens.sampleNoticeButton')}
-                    </Text>
+                    <Text style={styles.clearBtnText}>✕ Clear</Text>
                   </TouchableOpacity>
-                </View>
-
-                {/* Error Banner */}
-                {Boolean(docError) && (
-                  <View style={styles.errorBox}>
-                    <Text style={styles.errorText}>⚠️ {docError}</Text>
-                  </View>
                 )}
+              </View>
 
-                {/* Inspect Action */}
-                <SeniorButton
-                  title={
-                    isAnalyzingDoc
-                      ? 'Analyzing Document Patterns...'
-                      : t('scamLens.inspectDocumentButton')
-                  }
-                  variant="primary"
-                  onPress={handleInspectDocument}
-                  loading={isAnalyzingDoc}
-                  disabled={isAnalyzingDoc || docInput.trim().length === 0}
-                  accessibilityLabel={t('scamLens.inspectDocumentButton')}
-                  style={styles.primaryActionBtn}
-                />
-              </SeniorCard>
+              <SeniorButton
+                title="🔍 Inspect QR Safety"
+                onPress={handleInspectQr}
+                accessibilityLabel="🔍 Inspect QR Safety"
+                style={styles.inspectBtn}
+              />
 
-              {/* Document Analysis Result Card */}
-              {docResult && (
-                <SeniorCard
-                  variant="elevated"
-                  style={[
-                    styles.resultCard,
-                    {
-                      backgroundColor:
-                        docResult.risk_level === 'HIGH_RISK'
-                          ? '#FFF5F5'
-                          : docResult.risk_level === 'CAUTION'
-                          ? '#FFFBEB'
-                          : '#F0FDF4',
-                    },
-                  ]}
-                >
-                  <View style={styles.resultHeaderRow}>
-                    <SeniorBadge
-                      variant={
-                        docResult.risk_level === 'HIGH_RISK'
-                          ? 'danger'
-                          : docResult.risk_level === 'CAUTION'
-                          ? 'caution'
-                          : 'safe'
-                      }
-                      label={docResult.risk_level}
-                    />
-                    <Text style={styles.resultTitle}>
-                      {t('scamLens.documentResultTitle')}
-                    </Text>
-                  </View>
+              {/* QR Safety Result */}
+              {Boolean(qrResult) && (
+                <View style={styles.resultContainer}>
+                  <View
+                    style={[
+                      styles.resultCard,
+                      qrResult?.riskSeverity === 'HIGH_RISK'
+                        ? styles.resultCardDanger
+                        : styles.resultCardSafe,
+                    ]}
+                  >
+                    <View style={styles.resultHeader}>
+                      <Text style={styles.resultTitle}>
+                        {qrResult?.title || 'Suspicious UPI Payment QR'}
+                      </Text>
+                      <SeniorBadge
+                        variant={qrResult?.riskSeverity === 'HIGH_RISK' ? 'danger' : 'safe'}
+                        label={qrResult?.riskSeverity === 'HIGH_RISK' ? 'HIGH RISK' : 'SAFE'}
+                      />
+                    </View>
 
-                  <Text style={styles.explanationBody}>
-                    {docResult.explanation}
-                  </Text>
-
-                  {/* Warning Indicators */}
-                  {docResult.detected_indicators &&
-                    docResult.detected_indicators.length > 0 && (
-                      <View style={styles.warningsBox}>
-                        <Text style={styles.warningBoxTitle}>
-                          Detected Warning Patterns:
+                    {Boolean(qrResult?.upiDetails?.amount) && (
+                      <View style={styles.amountBox}>
+                        <Text style={styles.amountLabel}>Preset Debit Amount: </Text>
+                        <Text style={styles.amountVal}>
+                          {`₹${qrResult?.upiDetails?.amount}`}
                         </Text>
-                        {docResult.detected_indicators.map((ind, i) => (
-                          <Text key={i} style={styles.warningItemText}>
-                            {`• ${ind.description}`}
-                          </Text>
-                        ))}
                       </View>
                     )}
 
-                  {/* Actions */}
-                  {docResult.recommended_actions && (
-                    <View style={styles.actionsBox}>
-                      <Text style={styles.actionsTitle}>
-                        Senior Safety Advice:
-                      </Text>
-                      {docResult.recommended_actions.map((act, i) => (
-                        <Text key={i} style={styles.actionItemText}>
-                          {i + 1}. {act}
-                        </Text>
-                      ))}
-                    </View>
-                  )}
-
-                  {/* Emergency Helpline Shortcut if high threat */}
-                  {Boolean(onNavigateToEmergency) &&
-                    docResult.risk_level === 'HIGH_RISK' && (
-                      <SeniorButton
-                        title="🚨 Call Cyber Helpline 1930"
-                        variant="danger"
-                        onPress={() => onNavigateToEmergency?.()}
-                        style={styles.emergencyBtn}
-                      />
-                    )}
-                </SeniorCard>
+                    <Text style={styles.resultExplain}>{qrResult?.summary}</Text>
+                  </View>
+                </View>
               )}
             </View>
           )}
+
+          {/* TAB 2: DOCUMENT INSPECTION PANEL */}
+          {activeTab === 'DOCUMENT' && (
+            <View style={styles.panelCard}>
+              <Text style={styles.panelTitle}>Document Fraud Inspector</Text>
+              <TextInput
+                value={docInput}
+                onChangeText={(text) => {
+                  setDocInput(text);
+                  if (docResult) setDocResult(null);
+                }}
+                placeholder="Type or paste text from the physical letter, electricity notice, or court summon..."
+                placeholderTextColor="#94A3B8"
+                multiline={true}
+                numberOfLines={4}
+                style={styles.panelTextInput}
+                accessibilityLabel={t('scamLens.docInputLabel')}
+              />
+
+              <View style={styles.toolsRow}>
+                <TouchableOpacity
+                  onPress={handlePasteDoc}
+                  style={styles.toolBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel="📋 Paste Document Text"
+                >
+                  <Text style={styles.toolBtnText}>📋 Paste Text</Text>
+                </TouchableOpacity>
+
+                {docInput.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setDocInput('');
+                      setDocResult(null);
+                    }}
+                    style={styles.clearBtn}
+                  >
+                    <Text style={styles.clearBtnText}>✕ Clear</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {Boolean(docError) && (
+                <View style={styles.errorBanner}>
+                  <Text style={styles.errorText}>⚠️ {docError}</Text>
+                </View>
+              )}
+
+              <SeniorButton
+                title="🔍 Inspect Document for Scam Patterns"
+                onPress={handleInspectDocument}
+                loading={isAnalyzingDoc}
+                accessibilityLabel="🔍 Inspect Document for Scam Patterns"
+                style={styles.inspectBtn}
+              />
+
+              {/* Document Result */}
+              {Boolean(docResult) && (
+                <View style={styles.resultContainer}>
+                  <View style={[styles.resultCard, styles.resultCardDanger]}>
+                    <Text style={styles.resultTitle}>Document Fraud Analysis</Text>
+                    <Text style={styles.resultExplain}>{docResult?.explanation}</Text>
+
+                    {docResult?.detected_indicators?.map((ind, i) => (
+                      <Text key={i} style={styles.indicatorBullet}>
+                        {`• ${ind.description}`}
+                      </Text>
+                    ))}
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* Master Reference #9: Recent Scans Section */}
+          <View style={styles.recentSectionHeader}>
+            <Text style={styles.recentSectionTitle}>Recent Scans</Text>
+            <TouchableOpacity onPress={() => {}}>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.recentScanItem}>
+            <View style={styles.recentScanLeft}>
+              <View style={styles.recentScanIconCircle}>
+                <Text style={styles.recentScanIcon}>🔲</Text>
+              </View>
+              <View style={styles.recentScanTextCol}>
+                <Text style={styles.recentScanTitle}>QR • UPI Payment</Text>
+                <View style={styles.recentScanBadgeRow}>
+                  <Text style={styles.recentSafeBadge}>Safe</Text>
+                  <Text style={styles.recentTimeText}>• 3h ago</Text>
+                </View>
+              </View>
+            </View>
+            <Text style={styles.recentChevron}>›</Text>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -553,253 +388,359 @@ export const ScamLensScreen: React.FC<ScamLensScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: SeniorTheme.colors.backgroundMain,
+    backgroundColor: '#F8F9FA',
   },
   keyboardContainer: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: SeniorTheme.spacing.lg,
-    paddingVertical: SeniorTheme.spacing.md,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingBottom: 32,
   },
-  tabsRow: {
-    flexDirection: 'row',
-    paddingHorizontal: SeniorTheme.spacing.lg,
-    marginBottom: SeniorTheme.spacing.sm,
-    gap: SeniorTheme.spacing.sm,
-  },
-  tabButton: {
-    flex: 1,
-    minHeight: 48,
-    backgroundColor: SeniorTheme.colors.white,
-    borderRadius: SeniorTheme.radii.md,
+  heroCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginBottom: 16,
     borderWidth: 1.5,
-    borderColor: '#CBD5E1',
+    borderColor: '#E2E8F0',
+    shadowColor: '#152720',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  viewfinderFrame: {
+    width: 80,
+    height: 80,
+    position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: SeniorTheme.spacing.sm,
+    marginBottom: 14,
   },
-  tabButtonActive: {
-    backgroundColor: SeniorTheme.colors.richEmerald,
-    borderColor: SeniorTheme.colors.richEmerald,
+  cornerBracket: {
+    position: 'absolute',
+    width: 16,
+    height: 16,
+    borderColor: '#2D6B51',
   },
-  tabText: {
-    fontSize: SeniorTheme.typography.bodySmall,
+  bracketTopLeft: {
+    top: 0,
+    left: 0,
+    borderTopWidth: 3,
+    borderLeftWidth: 3,
+    borderTopLeftRadius: 6,
+  },
+  bracketTopRight: {
+    top: 0,
+    right: 0,
+    borderTopWidth: 3,
+    borderRightWidth: 3,
+    borderTopRightRadius: 6,
+  },
+  bracketBottomLeft: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: 3,
+    borderLeftWidth: 3,
+    borderBottomLeftRadius: 6,
+  },
+  bracketBottomRight: {
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+    borderBottomRightRadius: 6,
+  },
+  viewfinderCenter: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#E8F5EE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  viewfinderIcon: {
+    fontSize: 22,
+  },
+  heroHeadline: {
+    fontSize: 22,
     fontWeight: '800',
-    color: SeniorTheme.colors.deepForest,
+    color: '#152720',
+    marginBottom: 6,
+    textAlign: 'center',
   },
-  tabTextActive: {
-    color: SeniorTheme.colors.white,
+  heroSubtitle: {
+    fontSize: 14,
+    color: '#64748B',
+    textAlign: 'center',
+    maxWidth: 280,
   },
-  card: {
-    padding: SeniorTheme.spacing.lg,
-    marginBottom: SeniorTheme.spacing.lg,
+  featureCardsRow: {
+    gap: 12,
+    marginBottom: 18,
+  },
+  featureCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    shadowColor: '#152720',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  featureCardSelected: {
+    borderColor: '#2D6B51',
+    backgroundColor: '#F7FCF9',
+    borderWidth: 2,
+  },
+  cardLeftCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    flex: 1,
+  },
+  featureIconBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#E8F5EE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  featureIcon: {
+    fontSize: 22,
+  },
+  featureTextCol: {
+    flex: 1,
+  },
+  featureTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#152720',
+  },
+  featureSub: {
+    fontSize: 13,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  featureArrow: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#2D6B51',
+    marginLeft: 8,
+  },
+  panelCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    marginBottom: 20,
+    shadowColor: '#152720',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  panelTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#152720',
+    marginBottom: 12,
+  },
+  panelTextInput: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    padding: 14,
+    minHeight: 90,
+    fontSize: 15,
+    color: '#152720',
+    textAlignVertical: 'top',
   },
   toolsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 10,
+    marginVertical: 12,
     alignItems: 'center',
-    marginVertical: SeniorTheme.spacing.xs,
   },
   toolBtn: {
-    minHeight: 44,
-    paddingHorizontal: SeniorTheme.spacing.md,
-    backgroundColor: '#F0F9F5',
-    borderRadius: SeniorTheme.radii.sm,
-    borderWidth: 1.5,
-    borderColor: SeniorTheme.colors.emeraldLight,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   toolBtnText: {
-    fontSize: SeniorTheme.typography.bodySmall,
+    fontSize: 13,
     fontWeight: '700',
-    color: SeniorTheme.colors.richEmerald,
+    color: '#1E293B',
   },
   clearBtn: {
-    minHeight: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: SeniorTheme.spacing.sm,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
   },
   clearBtnText: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    fontWeight: '700',
-    color: SeniorTheme.colors.textDim,
-  },
-  sampleContainer: {
-    marginTop: SeniorTheme.spacing.sm,
-    marginBottom: SeniorTheme.spacing.md,
-  },
-  sampleTitle: {
-    fontSize: SeniorTheme.typography.caption,
-    fontWeight: '700',
-    color: SeniorTheme.colors.textDim,
-    marginBottom: 4,
-  },
-  sampleBtnRow: {
-    flexDirection: 'row',
-    gap: SeniorTheme.spacing.sm,
-    flexWrap: 'wrap',
-  },
-  samplePill: {
-    backgroundColor: SeniorTheme.colors.backgroundMain,
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: SeniorTheme.radii.sm,
-    paddingHorizontal: SeniorTheme.spacing.sm,
-    paddingVertical: 6,
-  },
-  samplePillText: {
-    fontSize: SeniorTheme.typography.caption,
-    fontWeight: '700',
-    color: SeniorTheme.colors.deepForest,
-  },
-  primaryActionBtn: {
-    minHeight: SeniorTheme.dimensions.minTouchTarget + 6,
-    marginTop: SeniorTheme.spacing.xs,
-  },
-  resultCard: {
-    padding: SeniorTheme.spacing.lg,
-    marginBottom: SeniorTheme.spacing.xl,
-    borderWidth: 2,
-  },
-  resultHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SeniorTheme.spacing.sm,
-  },
-  resultTitle: {
-    fontSize: SeniorTheme.typography.titleMedium,
-    fontWeight: '800',
-    marginLeft: SeniorTheme.spacing.sm,
-    flex: 1,
-  },
-  resultSummary: {
-    fontSize: SeniorTheme.typography.body,
-    color: SeniorTheme.colors.deepForest,
-    lineHeight: 24,
-    marginBottom: SeniorTheme.spacing.md,
-  },
-  detailsBox: {
-    backgroundColor: SeniorTheme.colors.white,
-    borderRadius: SeniorTheme.radii.md,
-    padding: SeniorTheme.spacing.md,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: SeniorTheme.spacing.md,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 4,
-  },
-  detailLabel: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    fontWeight: '700',
-    color: SeniorTheme.colors.deepForest,
-  },
-  detailValue: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    color: SeniorTheme.colors.deepForest,
-    maxWidth: 200,
-  },
-  detailValuePrice: {
-    fontSize: SeniorTheme.typography.bodyLarge,
-    fontWeight: '800',
-    color: SeniorTheme.colors.riskDanger,
-  },
-  warningsBox: {
-    backgroundColor: '#FFFBEB',
-    borderRadius: SeniorTheme.radii.sm,
-    padding: SeniorTheme.spacing.md,
-    marginBottom: SeniorTheme.spacing.md,
-    borderWidth: 1,
-    borderColor: SeniorTheme.colors.riskWarningBorder,
-  },
-  warningBoxTitle: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    fontWeight: '800',
-    color: SeniorTheme.colors.riskWarning,
-    marginBottom: 4,
-  },
-  warningItemText: {
-    fontSize: SeniorTheme.typography.caption,
-    color: SeniorTheme.colors.deepForest,
-    lineHeight: 20,
-    marginTop: 2,
-  },
-  criticalNoticeBox: {
-    backgroundColor: '#FFF5F5',
-    borderRadius: SeniorTheme.radii.sm,
-    padding: SeniorTheme.spacing.md,
-    borderWidth: 1.5,
-    borderColor: SeniorTheme.colors.riskDangerBorder,
-  },
-  criticalNoticeText: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    fontWeight: '800',
-    color: SeniorTheme.colors.riskDanger,
-    lineHeight: 22,
-  },
-  safeNoticeText: {
-    fontSize: SeniorTheme.typography.caption,
+    fontSize: 13,
+    color: '#94A3B8',
     fontWeight: '600',
-    color: SeniorTheme.colors.deepForest,
+  },
+  inspectBtn: {
+    minHeight: 50,
+    borderRadius: 14,
     marginTop: 4,
   },
-  noticeCard: {
-    padding: SeniorTheme.spacing.md,
-    backgroundColor: '#F8FAFC',
-    borderColor: '#CBD5E1',
-    marginBottom: SeniorTheme.spacing.md,
+  resultContainer: {
+    marginTop: 16,
   },
-  noticeText: {
-    fontSize: SeniorTheme.typography.caption,
-    color: SeniorTheme.colors.textDim,
+  resultCard: {
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1.5,
+  },
+  resultCardDanger: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+  },
+  resultCardSafe: {
+    backgroundColor: '#EBF7F2',
+    borderColor: '#A8D9C5',
+  },
+  resultHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  resultTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#152720',
+  },
+  amountBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginVertical: 6,
+  },
+  amountLabel: {
+    fontSize: 14,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  amountVal: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#DC2626',
+  },
+  resultExplain: {
+    fontSize: 14,
+    color: '#475569',
     lineHeight: 20,
+    marginTop: 4,
   },
-  errorBox: {
-    backgroundColor: '#FFF5F5',
-    padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.sm,
-    marginBottom: SeniorTheme.spacing.md,
-    borderWidth: 1,
-    borderColor: SeniorTheme.colors.riskDangerBorder,
+  indicatorBullet: {
+    fontSize: 13,
+    color: '#DC2626',
+    fontWeight: '600',
+    marginTop: 4,
+  },
+  errorBanner: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 10,
   },
   errorText: {
-    fontSize: SeniorTheme.typography.bodySmall,
-    color: SeniorTheme.colors.riskDanger,
-    fontWeight: '700',
+    fontSize: 13,
+    color: '#DC2626',
+    fontWeight: '600',
   },
-  explanationBody: {
-    fontSize: SeniorTheme.typography.body,
-    color: SeniorTheme.colors.deepForest,
-    lineHeight: 24,
-    marginBottom: SeniorTheme.spacing.md,
+  recentSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  actionsBox: {
-    backgroundColor: SeniorTheme.colors.white,
-    padding: SeniorTheme.spacing.md,
-    borderRadius: SeniorTheme.radii.md,
-    marginBottom: SeniorTheme.spacing.md,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  actionsTitle: {
-    fontSize: SeniorTheme.typography.bodySmall,
+  recentSectionTitle: {
+    fontSize: 17,
     fontWeight: '800',
-    color: SeniorTheme.colors.deepForest,
+    color: '#152720',
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#2D6B51',
+  },
+  recentScanItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    shadowColor: '#152720',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  recentScanLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  recentScanIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#E8F5EE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recentScanIcon: {
+    fontSize: 22,
+  },
+  recentScanTextCol: {
+    justifyContent: 'center',
+  },
+  recentScanTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#152720',
     marginBottom: 4,
   },
-  actionItemText: {
-    fontSize: SeniorTheme.typography.caption,
-    color: SeniorTheme.colors.deepForest,
-    lineHeight: 20,
-    marginTop: 2,
+  recentScanBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
-  emergencyBtn: {
-    marginTop: SeniorTheme.spacing.sm,
-    minHeight: 48,
+  recentSafeBadge: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#2D6B51',
+  },
+  recentTimeText: {
+    fontSize: 12,
+    color: '#94A3B8',
+  },
+  recentChevron: {
+    fontSize: 22,
+    color: '#94A3B8',
+    fontWeight: '700',
   },
 });

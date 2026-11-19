@@ -20,6 +20,7 @@ export interface SeniorDialogProps {
   isDestructive?: boolean;
   dismissable?: boolean;
   accessibilityLabel?: string;
+  confirmAccessibilityLabel?: string;
 }
 
 export const SeniorDialog: React.FC<SeniorDialogProps> = ({
@@ -33,6 +34,7 @@ export const SeniorDialog: React.FC<SeniorDialogProps> = ({
   isDestructive = false,
   dismissable = true,
   accessibilityLabel,
+  confirmAccessibilityLabel,
 }) => {
   const handleBackdropPress = () => {
     if (dismissable && onCancel) {
@@ -73,6 +75,7 @@ export const SeniorDialog: React.FC<SeniorDialogProps> = ({
                   title={confirmText}
                   variant={isDestructive ? 'danger' : 'primary'}
                   onPress={onConfirm}
+                  accessibilityLabel={confirmAccessibilityLabel || confirmText}
                   style={styles.actionButton}
                 />
 

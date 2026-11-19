@@ -11,3 +11,6 @@ export * from './EmergencyScreen';
 export * from './FamilyCircleScreen';
 export * from './ScamSimulatorScreen';
 export * from './VoiceGuardianScreen';
+export * from './SignUpScreen';
+export * from './NotificationsScreen';
+export * from './ProfileScreen';

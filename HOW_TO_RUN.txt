@@ -56,8 +56,36 @@ PART 1: RUNNING THE BACKEND SERVER (FastAPI)
 PART 2: RUNNING THE MOBILE APPLICATION (React Native / Android)
 ================================================================================
 
-OPTION A: INSTALL PRE-BUILT APK DIRECTLY (FASTEST)
----------------------------------------------------
+OPTION A: OPEN & RUN IN ANDROID STUDIO (RECOMMENDED FOR ANDROID STUDIO USERS)
+----------------------------------------------------------------------------
+1. Open Android Studio.
+2. In the Welcome dialog or top menu, choose:
+      File  -->  Open...
+3. IMPORTANT: Navigate to and select the "android" subfolder:
+      D:\Projects\ScamShield\mobile\android
+   (Do NOT select the root ScamShield or mobile folder; Android Studio requires
+   the mobile\android directory where build.gradle and settings.gradle reside).
+
+4. Gradle JDK Setup (if prompted):
+   - Go to: File -> Settings -> Build, Execution, Deployment -> Build Tools -> Gradle
+   - Under "Gradle JDK", ensure it is set to JDK 17 (e.g. C:\Users\user\jdk-17
+     or Android Studio's Embedded JDK 17+).
+
+5. Run the Application:
+   - Make sure the run configuration dropdown in the top toolbar shows "app".
+   - In the device dropdown, select your active emulator (e.g. Medium_Phone_API_37.0)
+     or your physical USB device.
+   - Click the green Run (Play) button ▶ (or press Shift + F10).
+   - The app will compile and launch directly on the device!
+   *(Note: An offline JavaScript bundle is already baked into the assets folder,
+   so the app runs smoothly with zero missing-bundle errors).*
+
+6. (Optional) Hot Reload in Development:
+   - If you want live JavaScript reloading, open a terminal in D:\Projects\ScamShield\mobile
+     and run: npm start
+
+OPTION B: INSTALL PRE-BUILT APK DIRECTLY (FASTEST CLI)
+------------------------------------------------------
 A verified debug APK has already been built and is ready to install!
 
 1. Connect your Android phone via USB (with "USB Debugging" enabled in Developer Options),

@@ -14,16 +14,24 @@ import {
   FamilyCircleScreen,
   ScamSimulatorScreen,
   VoiceGuardianScreen,
+  SignUpScreen,
+  NotificationsScreen,
+  ProfileScreen,
   SupportedLanguage,
 } from './screens';
 import { StorageService } from './services/storage';
 import { MessageAnalysisResponse } from './services/analysisApi';
+import { BottomNavTab } from './components/BottomNavigation';
+
+import { ComponentShowcaseScreen } from './screens/ComponentShowcaseScreen';
 
 export type AppScreen =
   | 'Splash'
+  | 'ComponentShowcase'
   | 'LanguageSelect'
   | 'Onboarding'
   | 'Login'
+  | 'SignUp'
   | 'Home'
   | 'MessageGuardian'
   | 'AnalysisResult'
@@ -32,7 +40,9 @@ export type AppScreen =
   | 'Emergency'
   | 'FamilyCircle'
   | 'ScamSimulator'
-  | 'VoiceGuardian';
+  | 'VoiceGuardian'
+  | 'Notifications'
+  | 'Profile';
 
 export const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('Splash');
@@ -84,6 +94,26 @@ export const App: React.FC = () => {
     navigateTo('AnalysisResult');
   };
 
+  const handleTabSelect = (tab: BottomNavTab) => {
+    switch (tab) {
+      case 'home':
+        setCurrentScreen('Home');
+        break;
+      case 'protect':
+        setCurrentScreen('CallGuardian');
+        break;
+      case 'learn':
+        setCurrentScreen('ScamSimulator');
+        break;
+      case 'family':
+        setCurrentScreen('FamilyCircle');
+        break;
+      case 'profile':
+        setCurrentScreen('Profile');
+        break;
+    }
+  };
+
   switch (currentScreen) {
     case 'Splash':
       return <SplashScreen onReady={handleSplashReady} />;
@@ -105,6 +135,15 @@ export const App: React.FC = () => {
         <LoginScreen
           onLoginSuccess={handleLoginSuccess}
           onChangeLanguage={() => navigateTo('LanguageSelect')}
+          onNavigateToSignUp={() => navigateTo('SignUp')}
+        />
+      );
+
+    case 'SignUp':
+      return (
+        <SignUpScreen
+          onSignUpSuccess={handleLoginSuccess}
+          onNavigateToLogin={() => navigateTo('Login')}
         />
       );
 
@@ -136,7 +175,12 @@ export const App: React.FC = () => {
       );
 
     case 'CallGuardian':
-      return <CallGuardianScreen onBack={() => setCurrentScreen('Home')} />;
+      return (
+        <CallGuardianScreen
+          onBack={() => setCurrentScreen('Home')}
+          onSelectTab={handleTabSelect}
+        />
+      );
 
     case 'ScamLens':
       return <ScamLensScreen onBack={() => setCurrentScreen('Home')} />;
@@ -145,10 +189,20 @@ export const App: React.FC = () => {
       return <EmergencyScreen onBack={() => setCurrentScreen('Home')} />;
 
     case 'FamilyCircle':
-      return <FamilyCircleScreen onBack={() => setCurrentScreen('Home')} />;
+      return (
+        <FamilyCircleScreen
+          onBack={() => setCurrentScreen('Home')}
+          onSelectTab={handleTabSelect}
+        />
+      );
 
     case 'ScamSimulator':
-      return <ScamSimulatorScreen onBack={() => setCurrentScreen('Home')} />;
+      return (
+        <ScamSimulatorScreen
+          onBack={() => setCurrentScreen('Home')}
+          onSelectTab={handleTabSelect}
+        />
+      );
 
     case 'VoiceGuardian':
       return (
@@ -157,6 +211,21 @@ export const App: React.FC = () => {
           onNavigateToEmergency={() => navigateTo('Emergency')}
         />
       );
+
+    case 'Notifications':
+      return <NotificationsScreen onBack={() => setCurrentScreen('Home')} />;
+
+    case 'Profile':
+      return (
+        <ProfileScreen
+          onBack={() => setCurrentScreen('Home')}
+          onChangeLanguage={() => navigateTo('LanguageSelect')}
+          onLogout={() => setCurrentScreen('Login')}
+        />
+      );
+
+    case 'ComponentShowcase':
+      return <ComponentShowcaseScreen onBack={() => setCurrentScreen('Home')} />;
 
     case 'Home':
     default:
@@ -169,7 +238,10 @@ export const App: React.FC = () => {
           onNavigateToFamilyCircle={() => navigateTo('FamilyCircle')}
           onNavigateToVoiceGuardian={() => navigateTo('VoiceGuardian')}
           onNavigateToEmergency={() => navigateTo('Emergency')}
+          onNavigateToNotifications={() => navigateTo('Notifications')}
+          onNavigateToProfile={() => navigateTo('Profile')}
           onChangeLanguage={() => navigateTo('LanguageSelect')}
+          onOpenShowcase={() => navigateTo('ComponentShowcase')}
         />
       );
   }
