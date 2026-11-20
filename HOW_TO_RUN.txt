@@ -21,7 +21,7 @@ PART 1: RUNNING THE BACKEND SERVER (FastAPI)
 ================================================================================
 
 1. Open a terminal (PowerShell or Command Prompt) and navigate to the backend directory:
-   cd d:\Projects\ScamShield\backend
+   cd d:\Projects\Rakshon\backend
 
 2. Activate the Python virtual environment:
    In PowerShell:
