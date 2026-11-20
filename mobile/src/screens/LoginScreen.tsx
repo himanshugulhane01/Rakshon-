@@ -39,6 +39,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const isDevanagari = i18n.language === 'hi' || i18n.language === 'mr';
+  const isMarathi = i18n.language === 'mr';
+  const isHindi = i18n.language === 'hi';
 
   // Forgot Password Modal State
   const [showForgotModal, setShowForgotModal] = useState(false);
@@ -138,7 +140,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               accessibilityRole="header"
               allowFontScaling={true}
             >
-              Welcome Back
+              {isMarathi ? 'पुन्हा आपले स्वागत आहे' : isDevanagari ? 'वापसी पर स्वागत है' : 'Welcome Back'}
             </Text>
             <Text
               style={[
@@ -147,7 +149,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               ]}
               allowFontScaling={true}
             >
-              Login to keep your device protected
+              {isMarathi
+                ? 'आपले डिव्हाइस सुरक्षित ठेवण्यासाठी लॉगिन करा'
+                : isDevanagari
+                ? 'अपने डिवाइस को सुरक्षित रखने के लिए लॉगिन करें'
+                : 'Login to keep your device protected'}
             </Text>
           </View>
 
@@ -192,7 +198,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               <TextInput
                 value={phone}
                 onChangeText={handlePhoneChange}
-                placeholder="Enter 10-digit mobile number"
+                placeholder={
+                  isMarathi
+                    ? '१०-अंकी मोबाइल नंबर टाका'
+                    : isDevanagari
+                    ? '10-अंकीय मोबाइल नंबर दर्ज करें'
+                    : 'Enter 10-digit mobile number'
+                }
                 placeholderTextColor={SeniorTheme.colors.textDim}
                 keyboardType="phone-pad"
                 maxLength={10}
@@ -214,7 +226,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               <TextInput
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Password"
+                placeholder={isMarathi ? 'पासवर्ड' : isDevanagari ? 'पासवर्ड' : 'Password'}
                 placeholderTextColor={SeniorTheme.colors.textDim}
                 secureTextEntry={!showPassword}
                 style={[
@@ -245,13 +257,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 ]}
                 allowFontScaling={true}
               >
-                Forgot Password?
+                {isMarathi ? 'पासवर्ड विसरलात?' : isDevanagari ? 'पासवर्ड भूल गए?' : 'Forgot Password?'}
               </Text>
             </TouchableOpacity>
 
             {/* Primary Login Button (Rich Emerald) */}
             <SeniorButton
-              title="Login"
+              title={isMarathi ? 'लॉगिन करा' : isDevanagari ? 'लॉगिन करें' : 'Login'}
               onPress={handleSubmit}
               loading={isLoading}
               accessibilityLabel="Continue"
@@ -269,7 +281,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 ]}
                 allowFontScaling={true}
               >
-                or
+                {isMarathi ? 'किंवा' : isDevanagari ? 'या' : 'or'}
               </Text>
               <View style={styles.dividerLine} />
             </View>
@@ -294,11 +306,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               <Text
                 style={[
                   styles.googleText,
-                  { fontFamily: getFontFamily('600', false) },
+                  { fontFamily: getFontFamily('600', isDevanagari) },
                 ]}
                 allowFontScaling={true}
               >
-                Continue with Google
+                {isMarathi ? 'Google सह पुढे जा' : isDevanagari ? 'Google के साथ आगे बढ़ें' : 'Continue with Google'}
               </Text>
             </TouchableOpacity>
 
@@ -311,7 +323,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 ]}
                 allowFontScaling={true}
               >
-                Don't have an account?{' '}
+                {isMarathi ? 'खाते नाही आहे का?' : isDevanagari ? 'खाता नहीं है?' : "Don't have an account?"}{' '}
               </Text>
               <TouchableOpacity onPress={onNavigateToSignUp}>
                 <Text
@@ -321,7 +333,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   ]}
                   allowFontScaling={true}
                 >
-                  Sign Up
+                  {isMarathi ? 'साइन अप करा' : isDevanagari ? 'साइन अप करें' : 'Sign Up'}
                 </Text>
               </TouchableOpacity>
             </View>

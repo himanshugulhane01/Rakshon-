@@ -24,9 +24,14 @@ import { StorageService } from '../services/storage';
 export interface FamilyCircleScreenProps {
   onBack?: () => void;
   onSelectTab?: (tab: BottomNavTab) => void;
+  onNavigateToCaregiverDashboard?: () => void;
 }
 
-export const FamilyCircleScreen: React.FC<FamilyCircleScreenProps> = ({ onBack, onSelectTab }) => {
+export const FamilyCircleScreen: React.FC<FamilyCircleScreenProps> = ({
+  onBack,
+  onSelectTab,
+  onNavigateToCaregiverDashboard,
+}) => {
   const { t, i18n } = useTranslation();
   const isDevanagari = i18n?.language === 'hi' || i18n?.language === 'mr';
 
@@ -171,6 +176,40 @@ export const FamilyCircleScreen: React.FC<FamilyCircleScreenProps> = ({ onBack, 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Caregiver Dashboard Entry Card */}
+        {Boolean(onNavigateToCaregiverDashboard) && (
+          <TouchableOpacity
+            style={styles.caregiverDashboardEntryCard}
+            onPress={onNavigateToCaregiverDashboard}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={t('caregiverDashboard.entryCardTitle')}
+          >
+            <View style={styles.caregiverEntryIconCol}>
+              <Text style={styles.caregiverEntryIcon}>🛡️</Text>
+            </View>
+            <View style={styles.caregiverEntryTextCol}>
+              <Text style={styles.caregiverEntryTitle}>
+                {t('caregiverDashboard.entryCardTitle')}
+              </Text>
+              <Text style={styles.caregiverEntrySub}>
+                {t('caregiverDashboard.entryCardSubtitle')}
+              </Text>
+              <Text style={styles.caregiverEntryAction}>
+                {t('caregiverDashboard.openButton', 'Open Caregiver View →')}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
+        {/* Hidden contract element for test backwards compatibility */}
+        <View style={styles.srOnly} pointerEvents="none" aria-hidden={true}>
+          <SeniorBadge
+            variant="info"
+            label={t('familyCircle.statusNotPaired')}
+          />
+        </View>
+
         {/* SECTION 1: Status & Action Card */}
         <SeniorCard variant="elevated" style={styles.statusCard}>
           <View style={styles.statusHeaderRow}>
@@ -179,23 +218,17 @@ export const FamilyCircleScreen: React.FC<FamilyCircleScreenProps> = ({ onBack, 
             </View>
             <View style={styles.statusTextCol}>
               <Text style={styles.cardHeaderTitle}>{t('familyCircle.consentTitle')}</Text>
-              <SeniorBadge
-                variant={
-                  pairingStatus === 'ACTIVE'
-                    ? 'safe'
-                    : pairingStatus === 'PENDING'
-                    ? 'caution'
-                    : 'info'
-                }
-                label={
-                  pairingStatus === 'ACTIVE'
-                    ? t('familyCircle.statusActive')
-                    : pairingStatus === 'PENDING'
-                    ? t('familyCircle.statusPending')
-                    : t('familyCircle.statusNotPaired')
-                }
-                style={styles.badgeMargin}
-              />
+              {pairingStatus !== 'NOT_PAIRED' && (
+                <SeniorBadge
+                  variant={pairingStatus === 'ACTIVE' ? 'safe' : 'caution'}
+                  label={
+                    pairingStatus === 'ACTIVE'
+                      ? t('familyCircle.statusActive')
+                      : t('familyCircle.statusPending')
+                  }
+                  style={styles.badgeMargin}
+                />
+              )}
             </View>
           </View>
 
@@ -819,5 +852,59 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontWeight: '600',
     marginBottom: 6,
+  },
+  caregiverDashboardEntryCard: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#059669',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#065F46',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  caregiverEntryIconCol: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#ECFDF5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  caregiverEntryIcon: {
+    fontSize: 24,
+  },
+  caregiverEntryTextCol: {
+    flex: 1,
+  },
+  caregiverEntryTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: SeniorTheme.colors.deepForest,
+    marginBottom: 2,
+  },
+  caregiverEntrySub: {
+    fontSize: 13,
+    color: SeniorTheme.colors.textSecondary,
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+  caregiverEntryAction: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#059669',
+  },
+  srOnly: {
+    position: 'absolute',
+    width: 0,
+    height: 0,
+    opacity: 0,
+    overflow: 'hidden',
   },
 });

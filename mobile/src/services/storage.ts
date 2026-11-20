@@ -38,7 +38,78 @@ export const PreferencesKeys = {
   FAMILY_PAIRED_AT: 'scamshield_pref_family_paired_at',
   SCAM_SIMULATOR_COMPLETED_IDS: 'scamshield_pref_simulator_completed_ids',
   SCAM_SIMULATOR_RESULTS: 'scamshield_pref_simulator_results',
+  BANKING_SANDBOX_STATS: 'scamshield_pref_banking_sandbox_stats',
+  AUDIO_VISUAL_PROGRESS: 'scamshield_pref_audiovisual_learning_progress',
+  SAFE_BROWSING_STATS: 'scamshield_pref_safe_browsing_stats',
+  CAREGIVER_PERMISSIONS: 'scamshield_pref_caregiver_permissions',
+  CAREGIVER_ALERTS_LOG: 'scamshield_pref_caregiver_alerts_log',
 } as const;
+
+export interface AudioVisualModuleProgress {
+  moduleId: string;
+  completedAt?: string;
+  quizScore: number;
+  isCompleted: boolean;
+  lastSlideIndex: number;
+}
+
+export interface AudioVisualLearningStats {
+  totalModules: number;
+  completedCount: number;
+  lastActiveModuleId?: string;
+  modules: Record<string, AudioVisualModuleProgress>;
+}
+
+export interface SafeBrowsingRecord {
+  scenarioId: string;
+  domain: string;
+  choiceId: string;
+  isSafe: boolean;
+  timestamp: string;
+}
+
+export interface SafeBrowsingStats {
+  totalScenarios: number;
+  completedScenarios: number;
+  correctAnswers: number;
+  accuracyPercentage: number;
+  isComplete: boolean;
+  records: SafeBrowsingRecord[];
+}
+
+export interface CaregiverPermissionSettings {
+  shareLearningProgress: boolean;
+  shareSecurityStatus: boolean;
+  shareHighRiskAlerts: boolean;
+  consentGrantedAt: string | null;
+}
+
+export interface CaregiverSafetyAlert {
+  id: string;
+  timestamp: string;
+  category: string;
+  title: string;
+  riskLevel: 'HIGH' | 'CRITICAL' | 'MEDIUM';
+  description: string;
+}
+
+export interface BankingSandboxRecord {
+  scenarioId: string;
+  category: string;
+  choiceId: string;
+  isSafe: boolean;
+  timestamp: string;
+}
+
+export interface BankingSandboxStats {
+  totalScenarios: number;
+  completedScenarios: number;
+  correctAnswers: number;
+  accuracyPercentage: number;
+  isComplete: boolean;
+  lastAttemptTimestamp?: string;
+  records: BankingSandboxRecord[];
+}
 
 export interface SimulatorAnswerRecord {
   scenarioId: string;
@@ -396,6 +467,265 @@ export const StorageService = {
   async clearUserSession(): Promise<void> {
     await this.clearSecureCredentials();
     await this.setPreference(PreferencesKeys.USER_FULL_NAME, '');
+  },
+
+  // --- Banking & UPI Practice Sandbox ---
+  async getBankingSandboxStats(): Promise<BankingSandboxStats> {
+    const raw = await this.getPreference(PreferencesKeys.BANKING_SANDBOX_STATS, '');
+    if (!raw) {
+      return {
+        totalScenarios: 4,
+        completedScenarios: 0,
+        correctAnswers: 0,
+        accuracyPercentage: 0,
+        isComplete: false,
+        records: [],
+      };
+    }
+    try {
+      return JSON.parse(raw) as BankingSandboxStats;
+    } catch {
+      return {
+        totalScenarios: 4,
+        completedScenarios: 0,
+        correctAnswers: 0,
+        accuracyPercentage: 0,
+        isComplete: false,
+        records: [],
+      };
+    }
+  },
+
+  async recordBankingSandboxAnswer(
+    scenarioId: string,
+    category: string,
+    choiceId: string,
+    isSafe: boolean
+  ): Promise<BankingSandboxStats> {
+    const stats = await this.getBankingSandboxStats();
+    const existingFiltered = stats.records.filter((r) => r.scenarioId !== scenarioId);
+    existingFiltered.push({
+      scenarioId,
+      category,
+      choiceId,
+      isSafe,
+      timestamp: new Date().toISOString(),
+    });
+
+    const totalScenarios = 4;
+    const completedScenarios = existingFiltered.length;
+    const correctAnswers = existingFiltered.filter((r) => r.isSafe).length;
+    const accuracyPercentage =
+      completedScenarios > 0 ? Math.round((correctAnswers / completedScenarios) * 100) : 0;
+    const isComplete = completedScenarios >= totalScenarios;
+
+    const newStats: BankingSandboxStats = {
+      totalScenarios,
+      completedScenarios,
+      correctAnswers,
+      accuracyPercentage,
+      isComplete,
+      lastAttemptTimestamp: new Date().toISOString(),
+      records: existingFiltered,
+    };
+
+    await this.setPreference(
+      PreferencesKeys.BANKING_SANDBOX_STATS,
+      JSON.stringify(newStats)
+    );
+    return newStats;
+  },
+
+  async resetBankingSandboxStats(): Promise<void> {
+    await this.setPreference(PreferencesKeys.BANKING_SANDBOX_STATS, '');
+  },
+
+  // --- Audio-Visual Learning Centre ---
+  async getAudioVisualProgress(): Promise<AudioVisualLearningStats> {
+    const raw = await this.getPreference(PreferencesKeys.AUDIO_VISUAL_PROGRESS);
+    if (!raw) {
+      return {
+        totalModules: 8,
+        completedCount: 0,
+        modules: {},
+      };
+    }
+    try {
+      return JSON.parse(raw) as AudioVisualLearningStats;
+    } catch {
+      return {
+        totalModules: 8,
+        completedCount: 0,
+        modules: {},
+      };
+    }
+  },
+
+  async saveAudioVisualModuleProgress(
+    moduleId: string,
+    lastSlideIndex: number,
+    isCompleted: boolean,
+    quizScore: number = 0
+  ): Promise<AudioVisualLearningStats> {
+    const stats = await this.getAudioVisualProgress();
+    const existing = stats.modules[moduleId] || {
+      moduleId,
+      quizScore: 0,
+      isCompleted: false,
+      lastSlideIndex: 0,
+    };
+
+    const newlyCompleted = isCompleted || existing.isCompleted;
+    stats.modules[moduleId] = {
+      moduleId,
+      lastSlideIndex,
+      isCompleted: newlyCompleted,
+      quizScore: Math.max(existing.quizScore, quizScore),
+      completedAt: newlyCompleted ? (existing.completedAt || new Date().toISOString()) : undefined,
+    };
+
+    stats.lastActiveModuleId = moduleId;
+    stats.completedCount = Object.values(stats.modules).filter((m) => m.isCompleted).length;
+
+    await this.setPreference(
+      PreferencesKeys.AUDIO_VISUAL_PROGRESS,
+      JSON.stringify(stats)
+    );
+    return stats;
+  },
+
+  async resetAudioVisualProgress(): Promise<void> {
+    await this.setPreference(PreferencesKeys.AUDIO_VISUAL_PROGRESS, '');
+  },
+
+  // --- Safe-Browsing Simulator ---
+  async getSafeBrowsingStats(): Promise<SafeBrowsingStats> {
+    const raw = await this.getPreference(PreferencesKeys.SAFE_BROWSING_STATS);
+    if (!raw) {
+      return {
+        totalScenarios: 4,
+        completedScenarios: 0,
+        correctAnswers: 0,
+        accuracyPercentage: 0,
+        isComplete: false,
+        records: [],
+      };
+    }
+    try {
+      return JSON.parse(raw) as SafeBrowsingStats;
+    } catch {
+      return {
+        totalScenarios: 4,
+        completedScenarios: 0,
+        correctAnswers: 0,
+        accuracyPercentage: 0,
+        isComplete: false,
+        records: [],
+      };
+    }
+  },
+
+  async recordSafeBrowsingAnswer(
+    scenarioId: string,
+    domain: string,
+    choiceId: string,
+    isSafe: boolean
+  ): Promise<SafeBrowsingStats> {
+    const stats = await this.getSafeBrowsingStats();
+    const existing = stats.records.filter((r) => r.scenarioId !== scenarioId);
+    existing.push({
+      scenarioId,
+      domain,
+      choiceId,
+      isSafe,
+      timestamp: new Date().toISOString(),
+    });
+
+    const totalScenarios = 4;
+    const completedScenarios = existing.length;
+    const correctAnswers = existing.filter((r) => r.isSafe).length;
+    const accuracyPercentage =
+      completedScenarios > 0 ? Math.round((correctAnswers / completedScenarios) * 100) : 0;
+    const isComplete = completedScenarios >= totalScenarios;
+
+    const newStats: SafeBrowsingStats = {
+      totalScenarios,
+      completedScenarios,
+      correctAnswers,
+      accuracyPercentage,
+      isComplete,
+      records: existing,
+    };
+
+    await this.setPreference(
+      PreferencesKeys.SAFE_BROWSING_STATS,
+      JSON.stringify(newStats)
+    );
+    return newStats;
+  },
+
+  async resetSafeBrowsingStats(): Promise<void> {
+    await this.setPreference(PreferencesKeys.SAFE_BROWSING_STATS, '');
+  },
+
+  // --- Caregiver Dashboard & Consent ---
+  async getCaregiverPermissions(): Promise<CaregiverPermissionSettings> {
+    const raw = await this.getPreference(PreferencesKeys.CAREGIVER_PERMISSIONS);
+    if (!raw) {
+      return {
+        shareLearningProgress: true,
+        shareSecurityStatus: true,
+        shareHighRiskAlerts: true,
+        consentGrantedAt: null,
+      };
+    }
+    try {
+      return JSON.parse(raw) as CaregiverPermissionSettings;
+    } catch {
+      return {
+        shareLearningProgress: true,
+        shareSecurityStatus: true,
+        shareHighRiskAlerts: true,
+        consentGrantedAt: null,
+      };
+    }
+  },
+
+  async setCaregiverPermissions(settings: CaregiverPermissionSettings): Promise<void> {
+    await this.setPreference(
+      PreferencesKeys.CAREGIVER_PERMISSIONS,
+      JSON.stringify(settings)
+    );
+  },
+
+  async getCaregiverAlertsLog(): Promise<CaregiverSafetyAlert[]> {
+    const raw = await this.getPreference(PreferencesKeys.CAREGIVER_ALERTS_LOG);
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw) as CaregiverSafetyAlert[];
+    } catch {
+      return [];
+    }
+  },
+
+  async recordCaregiverAlert(
+    category: string,
+    title: string,
+    riskLevel: 'HIGH' | 'CRITICAL' | 'MEDIUM',
+    description: string
+  ): Promise<CaregiverSafetyAlert[]> {
+    const logs = await this.getCaregiverAlertsLog();
+    const newAlert: CaregiverSafetyAlert = {
+      id: `alert_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      timestamp: new Date().toISOString(),
+      category,
+      title,
+      riskLevel,
+      description,
+    };
+    const updated = [newAlert, ...logs].slice(0, 20); // Keep last 20 alerts
+    await this.setPreference(PreferencesKeys.CAREGIVER_ALERTS_LOG, JSON.stringify(updated));
+    return updated;
   },
 
   // --- Secure Credentials ---

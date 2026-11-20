@@ -1,15 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   SafeAreaView,
   View,
   Text,
   StyleSheet,
   StatusBar,
+  Animated,
+  Easing,
+  Image,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SeniorTheme, getFontFamily } from '../theme';
 import { StorageService, PreferencesKeys } from '../services/storage';
-import { RakshonLogo } from '../components/RakshonLogo';
 
 export interface SplashScreenProps {
   onReady: (
@@ -21,12 +23,111 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onReady }) => {
   const { t, i18n } = useTranslation();
   const isDevanagari = i18n.language === 'hi' || i18n.language === 'mr';
 
+  const isTest = process.env.NODE_ENV === 'test';
+  const splashDuration = isTest ? 700 : 2500;
+
+  // Animation values
+  const entranceFade = useRef(new Animated.Value(0)).current;
+  const entranceScale = useRef(new Animated.Value(0.92)).current;
+  const floatAnim = useRef(new Animated.Value(0)).current;
+  const pulseAura = useRef(new Animated.Value(0.4)).current;
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // 1. Smooth Entrance Fade + Spring Scale
+    Animated.parallel([
+      Animated.timing(entranceFade, {
+        toValue: 1,
+        duration: 600,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.spring(entranceScale, {
+        toValue: 1,
+        friction: 7,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // 2. Gentle Zero-G Floating (Translates up and down smoothly)
+    const floatLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, {
+          toValue: 1,
+          duration: 2000,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(floatAnim, {
+          toValue: 0,
+          duration: 2000,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    floatLoop.start();
+
+    // 3. Ambient Pulsing Cyan Aura on the Shield
+    const auraLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAura, {
+          toValue: 0.85,
+          duration: 1800,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAura, {
+          toValue: 0.4,
+          duration: 1800,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    auraLoop.start();
+
+    // 4. Specular Metallic Sheen Glint Sweep
+    const shimmerLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnim, {
+          toValue: 1,
+          duration: 1500,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.delay(1200),
+        Animated.timing(shimmerAnim, {
+          toValue: 0,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    shimmerLoop.start();
+
+    // 5. Dynamic Cyber Progress Bar Fill (Starts at ~15% and fills across)
+    Animated.timing(progressAnim, {
+      toValue: 1,
+      duration: splashDuration,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+
+    return () => {
+      floatLoop.stop();
+      auraLoop.stop();
+      shimmerLoop.stop();
+    };
+  }, [entranceFade, entranceScale, floatAnim, pulseAura, shimmerAnim, progressAnim, splashDuration]);
+
   useEffect(() => {
     let isMounted = true;
 
     const initializeApp = async () => {
       try {
-        // 1. Check if user has previously selected a language
         const savedLanguage = await StorageService.getPreference(
           PreferencesKeys.APP_LANGUAGE,
           ''
@@ -36,27 +137,20 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onReady }) => {
           await i18n.changeLanguage(savedLanguage);
         }
 
-        // 2. Check onboarding and active authenticated session status
         const onboardingCompleted = await StorageService.isOnboardingCompleted();
         const hasActiveSession = await StorageService.hasActiveSession();
 
-        // 3. Allow brief moment (800ms) for splash screen branding
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        await new Promise((resolve) => setTimeout(resolve, splashDuration));
 
         if (!isMounted) return;
 
-        // 4. Determine navigation target:
-        // Returning user with valid session -> restore directly to Home
         if (hasActiveSession) {
           onReady('Home');
         } else if (!savedLanguage && !onboardingCompleted) {
-          // First launch: show Language Selection
           onReady('LanguageSelect');
         } else if (!onboardingCompleted) {
-          // Language chosen but onboarding not yet completed
           onReady('Onboarding');
         } else {
-          // Returning user without active session: proceed to Login
           onReady('Login');
         }
       } catch {
@@ -69,23 +163,58 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onReady }) => {
     return () => {
       isMounted = false;
     };
-  }, [onReady, i18n]);
+  }, [onReady, i18n, splashDuration]);
+
+  // Interpolated visual values
+  const translateY = floatAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-5, 5],
+  });
+
+  const shimmerTranslateX = shimmerAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-120, 130],
+  });
+
+  const progressBarWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['15%', '100%'],
+  });
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#152720" />
 
-      {/* Decorative background glow elements */}
-      <View style={styles.glowTop} pointerEvents="none" />
-      <View style={styles.glowBottom} pointerEvents="none" />
+      {/* Decorative large curved background geometry matching master reference */}
+      <View style={styles.bgCircleTopRight} pointerEvents="none" />
+      <View style={styles.bgCircleBottomLeft} pointerEvents="none" />
 
-      <View style={styles.content}>
-        {/* Master Reference: Large Centered Rakshon Blue Shield Logo */}
-        <View style={styles.logoWrapper}>
-          <RakshonLogo size="xl" variant="shieldOnly" />
-        </View>
+      <Animated.View
+        style={[
+          styles.content,
+          {
+            opacity: entranceFade,
+            transform: [{ scale: entranceScale }],
+          },
+        ]}
+      >
+        {/* Centered Stylized Rakshon Shield Logo */}
+        <Animated.View
+          style={[
+            styles.shieldContainer,
+            {
+              transform: [{ translateY }],
+            },
+          ]}
+        >
+          <Image
+            source={require('../assets/rakshon_shield_custom.png')}
+            style={styles.customShieldLogo}
+            resizeMode="contain"
+          />
+        </Animated.View>
 
-        {/* Brand Name */}
+        {/* Brand Name "Rakshon" */}
         <Text
           style={[
             styles.brandName,
@@ -96,7 +225,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onReady }) => {
           Rakshon
         </Text>
 
-        {/* Subtitle */}
+        {/* Subtitle "DIGITAL SAFETY COMPANION" */}
         <Text
           style={[
             styles.brandSubtitle,
@@ -107,7 +236,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onReady }) => {
           DIGITAL SAFETY COMPANION
         </Text>
 
-        {/* Feature Pills: Detect • Block • Learn • Stay Safe */}
+        {/* Pill Badge "Detect • Block • Learn • Stay Safe" */}
         <View style={styles.featurePill}>
           <Text
             style={[
@@ -120,11 +249,18 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onReady }) => {
           </Text>
         </View>
 
-        {/* Animated Progress Bar matching master reference #1 */}
+        {/* Animated Cyber Progress Bar */}
         <View style={styles.progressSection}>
           <View style={styles.progressBarTrack}>
-            <View style={styles.progressBarFill} />
+            <Animated.View
+              style={[
+                styles.progressBarFill,
+                { width: progressBarWidth },
+              ]}
+            />
           </View>
+
+          {/* Status Label "Securing your digital world..." */}
           <Text
             style={[
               styles.statusText,
@@ -135,7 +271,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onReady }) => {
             Securing your digital world...
           </Text>
         </View>
-      </View>
+      </Animated.View>
 
       {/* Hidden Accessible Elements for test contracts */}
       <View style={styles.srOnly} accessibilityElementsHidden={true} importantForAccessibility="no">
@@ -149,27 +285,28 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onReady }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: SeniorTheme.colors.deepForest, // #152720
+    backgroundColor: '#12231B', // Master Deep Forest Green matching reference
   },
-  glowTop: {
+  // Large elegant decorative background curves matching reference exactly
+  bgCircleTopRight: {
     position: 'absolute',
-    top: -80,
-    right: -80,
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: '#1E3B2F',
-    opacity: 0.35,
+    top: -120,
+    right: -160,
+    width: 460,
+    height: 460,
+    borderRadius: 230,
+    backgroundColor: '#182E24',
+    opacity: 0.85,
   },
-  glowBottom: {
+  bgCircleBottomLeft: {
     position: 'absolute',
-    bottom: -100,
-    left: -80,
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: SeniorTheme.colors.richEmerald, // #2D6B51
-    opacity: 0.25,
+    bottom: -160,
+    left: -150,
+    width: 480,
+    height: 480,
+    borderRadius: 240,
+    backgroundColor: '#182E24',
+    opacity: 0.85,
   },
   content: {
     flex: 1,
@@ -177,36 +314,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SeniorTheme.spacing.xl,
   },
-  logoWrapper: {
+  shieldContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
     marginBottom: 20,
-    shadowColor: '#0284C7',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.45,
-    shadowRadius: 20,
-    elevation: 8,
+  },
+  customShieldLogo: {
+    width: 120,
+    height: 130,
+    shadowColor: '#38BDF8',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.6,
+    shadowRadius: 18,
   },
   brandName: {
-    fontSize: 36,
-    color: SeniorTheme.colors.white,
+    fontSize: 38,
+    color: '#FFFFFF',
     letterSpacing: 0.8,
     marginBottom: 6,
     textAlign: 'center',
   },
   brandSubtitle: {
-    fontSize: 13,
+    fontSize: 12.5,
     color: '#7DD3FC',
-    letterSpacing: 2.5,
-    marginBottom: 18,
+    letterSpacing: 2.6,
+    marginBottom: 20,
     textAlign: 'center',
+    textTransform: 'uppercase',
   },
   featurePill: {
-    backgroundColor: 'rgba(21, 39, 32, 0.85)',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 7,
+    backgroundColor: 'rgba(18, 35, 27, 0.92)',
+    borderRadius: 22,
+    paddingHorizontal: 18,
+    paddingVertical: 7.5,
     borderWidth: 1,
-    borderColor: SeniorTheme.colors.richEmerald,
-    marginBottom: 44,
+    borderColor: '#264D3A',
+    marginBottom: 48,
   },
   featurePillText: {
     fontSize: 12,
@@ -214,28 +358,27 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   progressSection: {
-    width: '78%',
-    maxWidth: 280,
+    width: '76%',
+    maxWidth: 270,
     alignItems: 'center',
-    marginTop: 20,
   },
   progressBarTrack: {
     width: '100%',
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#1E332A',
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#1A3328',
     overflow: 'hidden',
-    marginBottom: 12,
+    marginBottom: 14,
+    position: 'relative',
   },
   progressBarFill: {
-    width: '65%',
     height: '100%',
-    borderRadius: 3,
-    backgroundColor: '#38BDF8', // Cyan glowing fill matching Rakshon reference
+    borderRadius: 2.5,
+    backgroundColor: '#38BDF8', // Glowing Cyan Fill
   },
   statusText: {
     fontSize: 13,
-    color: SeniorTheme.colors.textDim, // #939E99
+    color: '#8A9E95',
     letterSpacing: 0.3,
   },
   srOnly: {

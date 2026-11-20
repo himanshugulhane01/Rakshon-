@@ -1,0 +1,185 @@
+================================================================================
+RAKSHON (SCAMSHIELD) – COMPLETE TECHNOLOGY STACK, FRAMEWORKS, LANGUAGES & TOOLS
+================================================================================
+
+PROJECT NAME    : Rakshon (ScamShield)
+PROBLEM STATEMENT: Digital Literacy and Cyber Fraud Awareness Assistant for Senior Citizens
+APPLICATION TYPE: Full-Stack Cross-Platform Mobile App + Native Android Security Service + Cloud API Backend
+
+================================================================================
+1. CORE FRAMEWORKS & RUNTIMES
+================================================================================
+
+A. MOBILE APPLICATION FRAMEWORK:
+   • React Native (v0.76.2)
+     - Industry-standard cross-platform mobile framework by Meta.
+     - Powers all senior-friendly screens, navigation, and interactive simulations.
+   • React (v18.3.1)
+     - Core UI library utilizing functional components, custom hooks, and concurrent features.
+   • Hermes JavaScript Engine (v0.76.2)
+     - High-performance, lightweight AOT-compiled JavaScript engine optimized for React Native Android.
+     - Ensures instant cold-boot startup times and minimal memory footprint on senior devices.
+   • React Native Safe Area Context (v4.12.0)
+     - Dynamically manages safe insets for notch, camera cutouts, and system gesture bars.
+   • React Native Animated API
+     - Native-driver hardware-accelerated 60/120 FPS animation engine for smooth, fluid zero-gravity floating, specular light sweeps, and progress indicators.
+
+B. NATIVE ANDROID SUBSYSTEM & ARCHITECTURE:
+   • Android Jetpack Telecom Framework
+     - Implements android.telecom.CallScreeningService for real-time, on-device incoming call screening.
+   • Android Jetpack Room Database (v2.6.1)
+     - SQLite abstraction layer providing offline, zero-network threat screening directly on the phone.
+     - Zero audio interception and zero SMS permissions for strict senior privacy.
+   • Kotlin Coroutines & Flow (v1.8.1)
+     - Asynchronous, non-blocking background query execution for SQLite threat queries.
+   • Android Core KTX (v1.13.1) & AppCompat (v1.7.0)
+     - Backward compatibility and Kotlin extensions across Android API 26 through API 34+.
+
+C. BACKEND & CLOUD REST API:
+   • FastAPI (v0.115.0)
+     - Modern, ultra-fast Python web framework for building high-concurrency asynchronous REST APIs.
+   • Uvicorn (v0.32.0)
+     - Lightning-fast ASGI web server implementation based on uvloop and httptools.
+   • SQLAlchemy (v2.0.35)
+     - Comprehensive SQL toolkit and asynchronous Object Relational Mapper (ORM).
+   • Alembic (v1.13.3)
+     - Relational database schema migration and version control tool for PostgreSQL.
+   • Pydantic (v2.9.2) & Pydantic-Settings (v2.5.2)
+     - High-speed Rust-powered data parsing, schema validation, and type-safe configuration.
+
+
+================================================================================
+2. PROGRAMMING & SCRIPTING LANGUAGES
+================================================================================
+
+1. TypeScript (v5.6.3):
+   - Primary language for the entire mobile application frontend.
+   - Provides strict compile-time type safety, interface contracts, and prevention of runtime crashes.
+
+2. JavaScript (ESNext / JSX):
+   - Runtime execution, dynamic asset resolution, and Metro bundling.
+
+3. Kotlin (v1.9.24):
+   - Native Android language used for the background CallScreeningService, Room DAO, and SQLite threat entities.
+
+4. Java (JDK 17):
+   - Base JVM environment powering the Android Gradle build system and Kotlin compilation.
+
+5. Python (v3.10+):
+   - Powers the FastAPI backend microservice, threat intelligence pipelines, and test suites.
+
+6. SQL (PostgreSQL & SQLite):
+   - PostgreSQL on cloud backend for verified threat registries.
+   - SQLite Room database on Android device for local offline threat caching.
+
+7. XML (Extensible Markup Language):
+   - AndroidManifest.xml, adaptive launcher icons, vector drawables, color tokens, and style themes.
+
+8. HTML5 & CSS3:
+   - Standalone web prototypes, HTML5 2D Canvas particle physics simulation, and Generative UI components.
+
+
+================================================================================
+3. LIBRARIES & SPECIALIZED MODULES
+================================================================================
+
+A. INTERNATIONALIZATION (i18n):
+   • i18next (v23.16.5) & react-i18next (v15.1.1)
+     - Full trilingual localization supporting English (en), Hindi (hi), and Marathi (mr).
+     - Dynamic Devanagari typography engine adjusting font weights and line heights automatically.
+
+B. STORAGE & PERSISTENCE:
+   • StorageService (Asynchronous Key-Value Store)
+     - Senior training scores, language preferences, consent states, and caregiver alert logs.
+
+C. NETWORKING & EXTERNAL APIS:
+   • HTTPX (v0.27.2)
+     - Asynchronous HTTP client for backend external threat lookups and URL verification.
+   • Psycopg2-binary (v2.9.10)
+     - High-performance PostgreSQL database adapter for Python.
+
+D. ACCESSIBILITY & DESIGN SYSTEM:
+   • SeniorTheme Design System
+     - Custom WCAG 2.1 AA compliant color tokens: Deep Forest (#12231B), Emerald (#264D3A), Cyan (#38BDF8).
+     - Minimum 48x48dp touch targets, high contrast (> 7:1 ratio), anti-glare dark forest green palette.
+
+
+================================================================================
+4. DEVELOPMENT, BUILD & EMULATION TOOLS
+================================================================================
+
+1. Node.js (v18+) & npm:
+   - JavaScript runtime and package manager managing all mobile modules.
+
+2. Metro Bundler (v0.81.5):
+   - Dedicated React Native JavaScript bundler compiling index.js into index.android.bundle.
+
+3. Gradle (v8.10.2) & Android Gradle Plugin (v8.4.1):
+   - Native Android build automation system compiling Kotlin, Java, and resources into app-debug.apk.
+
+4. Android SDK (Compile SDK 34, Target SDK 34, Min SDK 26):
+   - Google Android build tools (v34.0.0), AAPT2 resource compiler, and D8/R8 bytecode dexer.
+
+5. Java Development Kit 17 (JDK 17):
+   - Eclipse Temurin / OpenJDK 17 used as the primary JAVA_HOME build environment.
+
+6. Android Debug Bridge (adb.exe):
+   - Android SDK platform tool used to deploy APKs, stream installs, execute shell intents, inspect logcat, and capture real-time device screenshots.
+
+7. Android Emulator (QEMU API 34/37):
+   - Hardware-accelerated virtual device emulator for testing responsive layouts, touch gestures, and live screen rendering.
+
+8. Git:
+   - Distributed version control system tracking all commits, feature baselines, and reports.
+
+9. Windows PowerShell:
+   - Command shell used for automated script execution, build chaining, and continuous integration tasks.
+
+
+================================================================================
+5. TESTING & QUALITY ASSURANCE TOOLS
+================================================================================
+
+A. MOBILE TEST SUITE:
+   • Jest (v29.7.0)
+     - JavaScript/TypeScript test runner executing 18 test suites and 146 unit tests.
+   • React Test Renderer (v18.3.1)
+     - Headless React component tree snapshotting and structural verification.
+   • Babel (v7.25.6)
+     - Transpiler presets (@react-native/babel-preset) for compiling TypeScript and JSX under Jest.
+
+B. NATIVE ANDROID TESTS:
+   • JUnit 4 (v4.13.2)
+     - Standard test framework for native Android Java/Kotlin classes.
+   • kotlinx-coroutines-test (v1.8.1)
+     - Virtual time control for testing asynchronous coroutine-based Room database calls.
+
+C. BACKEND API TESTS:
+   • Pytest (v8.3.3)
+     - Python testing framework executing backend endpoint assertions.
+   • Pytest-Asyncio (v0.24.0)
+     - Native asyncio test runner for FastAPI asynchronous route handlers.
+
+
+================================================================================
+6. SUMMARY QUICK REFERENCE TABLE
+================================================================================
+
+Layer                Technology / Tool               Version / Spec
+-------------------  ------------------------------  ---------------------------
+Mobile Frontend      React Native + React            v0.76.2 / v18.3.1
+JavaScript Engine    Hermes Engine                   AOT Bytecode
+Language (Frontend)  TypeScript                      v5.6.3
+Localization         i18next / react-i18next         v23.16.5 / v15.1.1
+Native Android       Kotlin + Jetpack Room DB        v1.9.24 / v2.6.1
+Call Screening       CallScreeningService            Android Telecom API
+Build System         Gradle + Gradle Wrapper         v8.10.2 (AGP 8.4.1)
+Java Environment     OpenJDK / Temurin JDK           v17
+Backend Framework    FastAPI + Uvicorn               v0.115.0 / v0.32.0
+Backend Language     Python                          v3.10+
+Backend ORM          SQLAlchemy + Alembic            v2.0.35 / v1.13.3
+Database             PostgreSQL (Cloud) + SQLite     pg-binary 2.9.10 / Room
+Test Runners         Jest (Mobile) + Pytest (API)    v29.7.0 / v8.3.3
+Android Target       Android API 26 to 34+           Build Tools 34.0.0
+================================================================================
+

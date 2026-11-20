@@ -14,3 +14,8 @@ export * from './VoiceGuardianScreen';
 export * from './SignUpScreen';
 export * from './NotificationsScreen';
 export * from './ProfileScreen';
+export * from './BankingSandboxScreen';
+export * from './AudioVisualLearningScreen';
+export * from './SafeBrowsingSimulatorScreen';
+export * from './CaregiverDashboardScreen';
+export * from './UnifiedSafeCheckerScreen';

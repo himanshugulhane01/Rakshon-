@@ -17,6 +17,11 @@ import {
   SignUpScreen,
   NotificationsScreen,
   ProfileScreen,
+  BankingSandboxScreen,
+  AudioVisualLearningScreen,
+  SafeBrowsingSimulatorScreen,
+  CaregiverDashboardScreen,
+  UnifiedSafeCheckerScreen,
   SupportedLanguage,
 } from './screens';
 import { StorageService } from './services/storage';
@@ -42,7 +47,12 @@ export type AppScreen =
   | 'ScamSimulator'
   | 'VoiceGuardian'
   | 'Notifications'
-  | 'Profile';
+  | 'Profile'
+  | 'BankingSandbox'
+  | 'AudioVisualLearning'
+  | 'SafeBrowsing'
+  | 'CaregiverDashboard'
+  | 'UnifiedChecker';
 
 export const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('Splash');
@@ -179,6 +189,16 @@ export const App: React.FC = () => {
         <CallGuardianScreen
           onBack={() => setCurrentScreen('Home')}
           onSelectTab={handleTabSelect}
+          onNavigateToUnifiedChecker={() => navigateTo('UnifiedChecker')}
+        />
+      );
+
+    case 'UnifiedChecker':
+      return (
+        <UnifiedSafeCheckerScreen
+          onBack={() => setCurrentScreen('CallGuardian')}
+          onSelectTab={handleTabSelect}
+          onNavigateToEmergency={() => navigateTo('Emergency')}
         />
       );
 
@@ -193,6 +213,16 @@ export const App: React.FC = () => {
         <FamilyCircleScreen
           onBack={() => setCurrentScreen('Home')}
           onSelectTab={handleTabSelect}
+          onNavigateToCaregiverDashboard={() => navigateTo('CaregiverDashboard')}
+        />
+      );
+
+    case 'CaregiverDashboard':
+      return (
+        <CaregiverDashboardScreen
+          onBack={() => setCurrentScreen('FamilyCircle')}
+          onSelectTab={handleTabSelect}
+          onNavigateToEmergency={() => navigateTo('Emergency')}
         />
       );
 
@@ -200,6 +230,32 @@ export const App: React.FC = () => {
       return (
         <ScamSimulatorScreen
           onBack={() => setCurrentScreen('Home')}
+          onSelectTab={handleTabSelect}
+          onNavigateToBankingSandbox={() => navigateTo('BankingSandbox')}
+          onNavigateToAudioVisualLearning={() => navigateTo('AudioVisualLearning')}
+          onNavigateToSafeBrowsing={() => navigateTo('SafeBrowsing')}
+        />
+      );
+
+    case 'AudioVisualLearning':
+      return (
+        <AudioVisualLearningScreen
+          onBack={() => setCurrentScreen('ScamSimulator')}
+        />
+      );
+
+    case 'SafeBrowsing':
+      return (
+        <SafeBrowsingSimulatorScreen
+          onBack={() => setCurrentScreen('ScamSimulator')}
+          onSelectTab={handleTabSelect}
+        />
+      );
+
+    case 'BankingSandbox':
+      return (
+        <BankingSandboxScreen
+          onBack={() => setCurrentScreen('ScamSimulator')}
           onSelectTab={handleTabSelect}
         />
       );

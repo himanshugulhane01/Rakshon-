@@ -25,11 +25,18 @@ import {
 export interface CallGuardianScreenProps {
   onBack: () => void;
   onSelectTab?: (tab: BottomNavTab) => void;
+  onNavigateToUnifiedChecker?: () => void;
 }
 
-export const CallGuardianScreen: React.FC<CallGuardianScreenProps> = ({ onBack, onSelectTab }) => {
+export const CallGuardianScreen: React.FC<CallGuardianScreenProps> = ({
+  onBack,
+  onSelectTab,
+  onNavigateToUnifiedChecker,
+}) => {
   const { t, i18n } = useTranslation();
   const isDevanagari = i18n?.language === 'hi' || i18n?.language === 'mr';
+  const isMarathi = i18n?.language === 'mr';
+  const isHindi = i18n?.language === 'hi';
 
   const handleBottomTabSelect = (tab: BottomNavTab) => {
     if (tab === 'protect') return;
@@ -141,7 +148,7 @@ export const CallGuardianScreen: React.FC<CallGuardianScreenProps> = ({ onBack, 
                 ]}
                 allowFontScaling={true}
               >
-                Device Protection
+                {isMarathi ? 'डिव्हाइस संरक्षण' : isDevanagari ? 'डिवाइस सुरक्षा' : 'Device Protection'}
               </Text>
               <Text
                 style={[
@@ -150,12 +157,18 @@ export const CallGuardianScreen: React.FC<CallGuardianScreenProps> = ({ onBack, 
                 ]}
                 allowFontScaling={true}
               >
-                Manage on-device security and threat data.
+                {isMarathi
+                  ? 'डिव्हाइस सुरक्षा आणि धोका डेटाचे व्यवस्थापन करा.'
+                  : isDevanagari
+                  ? 'डिवाइस सुरक्षा और खतरे के डेटा का प्रबंधन करें।'
+                  : 'Manage on-device security and threat data.'}
               </Text>
             </View>
             <View style={styles.deviceActivePill}>
               <View style={styles.deviceActiveDot} />
-              <Text style={styles.deviceActiveText}>ACTIVE</Text>
+              <Text style={styles.deviceActiveText}>
+                {isMarathi ? 'सक्रिय' : isDevanagari ? 'सक्रिय' : 'ACTIVE'}
+              </Text>
             </View>
           </View>
 
@@ -180,7 +193,7 @@ export const CallGuardianScreen: React.FC<CallGuardianScreenProps> = ({ onBack, 
                   ]}
                   allowFontScaling={true}
                 >
-                  Call Protection
+                  {isMarathi ? 'कॉल संरक्षण' : isDevanagari ? 'कॉल सुरक्षा' : 'Call Protection'}
                 </Text>
                 <Text
                   style={[
@@ -189,7 +202,11 @@ export const CallGuardianScreen: React.FC<CallGuardianScreenProps> = ({ onBack, 
                   ]}
                   allowFontScaling={true}
                 >
-                  Identify and warn about suspicious calls.
+                  {isMarathi
+                    ? 'संशयास्पद कॉल्स ओळखा आणि चेतावणी मिळवा.'
+                    : isDevanagari
+                    ? 'संदिग्ध कॉल्स को पहचानें और चेतावनी पाएं।'
+                    : 'Identify and warn about suspicious calls.'}
                 </Text>
               </View>
               <View style={styles.devicePillBadge}>
@@ -202,7 +219,9 @@ export const CallGuardianScreen: React.FC<CallGuardianScreenProps> = ({ onBack, 
                     },
                   ]}
                 >
-                  {isCallScreeningOn ? 'ACTIVE' : 'NEEDS SETUP'}
+                  {isCallScreeningOn
+                    ? (isMarathi ? 'सक्रिय' : isDevanagari ? 'सक्रिय' : 'ACTIVE')
+                    : (isMarathi ? 'सेटअप आवश्यक' : isDevanagari ? 'सेटअप आवश्यक' : 'NEEDS SETUP')}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -225,11 +244,41 @@ export const CallGuardianScreen: React.FC<CallGuardianScreenProps> = ({ onBack, 
                   { fontFamily: getFontFamily('700', isDevanagari) },
                 ]}
               >
-                🔄  Sync Protection Data
+                {isMarathi
+                  ? '🔄  संरक्षण डेटा सिंक करा'
+                  : isDevanagari
+                  ? '🔄  सुरक्षा डेटा सिंक करें'
+                  : '🔄  Sync Protection Data'}
               </Text>
             )}
           </TouchableOpacity>
         </View>
+
+        {/* Unified "Is This Safe?" Checker Entry Card */}
+        {Boolean(onNavigateToUnifiedChecker) && (
+          <TouchableOpacity
+            style={styles.unifiedCheckerCard}
+            onPress={onNavigateToUnifiedChecker}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={t('unifiedChecker.entryCardTitle')}
+          >
+            <View style={styles.unifiedCheckerIconCol}>
+              <Text style={styles.unifiedCheckerIcon}>🔍</Text>
+            </View>
+            <View style={styles.unifiedCheckerTextCol}>
+              <Text style={styles.unifiedCheckerTitle}>
+                {t('unifiedChecker.entryCardTitle')}
+              </Text>
+              <Text style={styles.unifiedCheckerSub}>
+                {t('unifiedChecker.entryCardSubtitle')}
+              </Text>
+              <Text style={styles.unifiedCheckerAction}>
+                {t('unifiedChecker.openButton', 'Check Safety Now →')}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
 
         {/* Sync Feedback Banner */}
         {Boolean(feedbackMessage) && (
@@ -517,5 +566,52 @@ const styles = StyleSheet.create({
     opacity: 0,
     width: 0,
     height: 0,
+  },
+  unifiedCheckerCard: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#059669',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#065F46',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  unifiedCheckerIconCol: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#ECFDF5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  unifiedCheckerIcon: {
+    fontSize: 24,
+  },
+  unifiedCheckerTextCol: {
+    flex: 1,
+  },
+  unifiedCheckerTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#152720',
+    marginBottom: 2,
+  },
+  unifiedCheckerSub: {
+    fontSize: 13,
+    color: '#64748B',
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+  unifiedCheckerAction: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#059669',
   },
 });

@@ -7,6 +7,7 @@ import {
   ViewStyle,
   StyleProp,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { SeniorTheme, getFontFamily } from '../theme';
 
 export type BottomNavTab = 'home' | 'protect' | 'learn' | 'family' | 'profile';
@@ -24,15 +25,35 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   style,
   isDevanagari = false,
 }) => {
-  const tabs: Array<{ id: BottomNavTab; label: string; icon: string }> = [
-    { id: 'home', label: 'Home', icon: '🏠' },
-    { id: 'protect', label: 'Protect', icon: '🛡️' },
-    { id: 'learn', label: 'Learn', icon: '🎓' },
-    { id: 'family', label: 'Family', icon: '👥' },
-    { id: 'profile', label: 'Profile', icon: '👤' },
+  const { i18n } = useTranslation();
+  const isMarathi = i18n.language === 'mr';
+  const isHindi = i18n.language === 'hi';
+  const isDev = isDevanagari || isMarathi || isHindi;
+
+  const getLocalizedLabel = (id: BottomNavTab) => {
+    switch (id) {
+      case 'home':
+        return isMarathi ? 'होम' : isHindi ? 'होम' : 'Home';
+      case 'protect':
+        return isMarathi ? 'संरक्षण' : isHindi ? 'सुरक्षा' : 'Protect';
+      case 'learn':
+        return isMarathi ? 'शिका' : isHindi ? 'सीखें' : 'Learn';
+      case 'family':
+        return isMarathi ? 'कुटुंब' : isHindi ? 'परिवार' : 'Family';
+      case 'profile':
+        return isMarathi ? 'प्रोफाइल' : isHindi ? 'प्रोफ़ाइल' : 'Profile';
+    }
+  };
+
+  const tabs: Array<{ id: BottomNavTab; englishLabel: string; icon: string }> = [
+    { id: 'home', englishLabel: 'Home', icon: '🏠' },
+    { id: 'protect', englishLabel: 'Protect', icon: '🛡️' },
+    { id: 'learn', englishLabel: 'Learn', icon: '🎓' },
+    { id: 'family', englishLabel: 'Family', icon: '👥' },
+    { id: 'profile', englishLabel: 'Profile', icon: '👤' },
   ];
 
-  const labelFont = getFontFamily('600', isDevanagari);
+  const labelFont = getFontFamily('600', isDev);
 
   return (
     <View
@@ -42,6 +63,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
     >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
+        const displayLabel = getLocalizedLabel(tab.id);
         return (
           <TouchableOpacity
             key={tab.id}
@@ -49,7 +71,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
             activeOpacity={0.75}
             accessible={true}
             accessibilityRole="tab"
-            accessibilityLabel={`${tab.label} tab`}
+            accessibilityLabel={`${tab.englishLabel} tab`}
             accessibilityState={{ selected: isActive }}
             style={styles.tabButton}
           >
@@ -72,7 +94,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
                 isActive ? styles.activeTabLabel : styles.inactiveTabLabel,
               ]}
             >
-              {tab.label}
+              {displayLabel}
             </Text>
           </TouchableOpacity>
         );

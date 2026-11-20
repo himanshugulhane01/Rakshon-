@@ -28,7 +28,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onChangeLanguage,
   onLogout,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isDevanagari = i18n?.language === 'hi' || i18n?.language === 'mr';
+  const isMarathi = i18n?.language === 'mr';
+  const isHindi = i18n?.language === 'hi';
   const [userName, setUserName] = useState<string>('');
   const [userPhone, setUserPhone] = useState<string>('');
 
@@ -44,7 +47,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   // Settings state
   const [vibrationAlerts, setVibrationAlerts] = useState(true);
   const [highContrast, setHighContrast] = useState(false);
-  const [voiceAssistance, setVoiceAssistance] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -89,38 +92,38 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   const menuItems = [
     {
       id: 'account',
-      title: 'My Account',
+      title: isMarathi ? 'माझे खाते' : isDevanagari ? 'मेरा खाता' : 'My Account',
       icon: '👤',
       action: () => setActiveModal('editProfile'),
     },
     {
       id: 'settings',
-      title: 'App Settings',
+      title: isMarathi ? 'अॅप सेटिंग्ज' : isDevanagari ? 'ऐप सेटिंग्स' : 'App Settings',
       icon: '⚙️',
       action: () => setActiveModal('settings'),
     },
     {
       id: 'language',
-      title: 'Language',
+      title: isMarathi ? 'भाषा' : isDevanagari ? 'भाषा' : 'Language',
       icon: '🌐',
-      subtext: 'English',
+      subtext: isMarathi ? 'मराठी' : isHindi ? 'हिंदी' : 'English',
       action: onChangeLanguage,
     },
     {
       id: 'activity',
-      title: 'My Activity',
+      title: isMarathi ? 'माझी कृती' : isDevanagari ? 'मेरी गतिविधि' : 'My Activity',
       icon: '🕒',
       action: () => setActiveModal('activity'),
     },
     {
       id: 'help',
-      title: 'Help & Support',
+      title: isMarathi ? 'मदत आणि पाठिंबा' : isDevanagari ? 'मदद और सहायता' : 'Help & Support',
       icon: '❓',
       action: () => setActiveModal('help'),
     },
     {
       id: 'about',
-      title: 'About Rakshon',
+      title: isMarathi ? 'रक्षणबद्दल' : isDevanagari ? 'रक्षण के बारे में' : 'About Rakshon',
       icon: 'ℹ️',
       action: () => setActiveModal('about'),
     },
@@ -132,7 +135,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
       {/* Header */}
       <SeniorHeader
-        title="My Profile"
+        title={isMarathi ? 'माझी प्रोफाइल' : isDevanagari ? 'मेरी प्रोफ़ाइल' : 'My Profile'}
         onBack={onBack}
         accessibilityLabel="My Profile screen"
       />
@@ -156,7 +159,15 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.userNameText}>{userName}</Text>
+          <Text style={styles.userNameText}>
+            {userName && userName !== 'Rakshon User'
+              ? userName
+              : isMarathi
+              ? 'रक्षण वापरकर्ता'
+              : isDevanagari
+              ? 'रक्षण उपयोगकर्ता'
+              : 'Rakshon User'}
+          </Text>
           <Text style={styles.userPhoneText}>{userPhone}</Text>
         </View>
 
@@ -199,13 +210,19 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           accessibilityLabel="Logout"
         >
           <Text style={styles.logoutIcon}>🚪</Text>
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={styles.logoutText}>
+            {isMarathi ? 'लॉगआउट' : isDevanagari ? 'लॉगआउट' : 'Logout'}
+          </Text>
         </TouchableOpacity>
 
         {/* Safe Privacy Disclaimer */}
         <View style={styles.privacyNote}>
           <Text style={styles.privacyNoteText}>
-            🔒 Rakshon protects your privacy with local-first processing. No SMS or personal passwords are ever sent to cloud servers.
+            {isMarathi
+              ? '🔒 रक्षण स्थानिक-प्रथम तंत्रज्ञानासह आपल्या गोपनीयतेचे रक्षण करते. कोणताही एसएमएस किंवा वैयक्तिक पासवर्ड कधीही क्लाउड सर्व्हरवर पाठवला जात नाही.'
+              : isDevanagari
+              ? '🔒 रक्षण स्थानीय-प्रथम तकनीक के साथ आपकी गोपनीयता की रक्षा करता है। कोई भी एसएमएस या व्यक्तिगत पासवर्ड कभी भी क्लाउड सर्वर पर नहीं भेजा जाता है।'
+              : '🔒 Rakshon protects your privacy with local-first processing. No SMS or personal passwords are ever sent to cloud servers.'}
           </Text>
         </View>
       </ScrollView>
@@ -219,10 +236,14 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Edit Profile</Text>
+            <Text style={styles.modalTitle}>
+              {isMarathi ? 'प्रोफाइल संपादित करा' : isDevanagari ? 'प्रोफ़ाइल संपादित करें' : 'Edit Profile'}
+            </Text>
 
             <View style={styles.modalInputGroup}>
-              <Text style={styles.modalLabel}>Full Name</Text>
+              <Text style={styles.modalLabel}>
+                {isMarathi ? 'पूर्ण नाव' : isDevanagari ? 'पूरा नाम' : 'Full Name'}
+              </Text>
               <TextInput
                 value={tempName}
                 onChangeText={setTempName}
@@ -231,7 +252,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             </View>
 
             <View style={styles.modalInputGroup}>
-              <Text style={styles.modalLabel}>Emergency Contact Number</Text>
+              <Text style={styles.modalLabel}>
+                {isMarathi ? 'आपत्कालीन संपर्क क्रमांक' : isDevanagari ? 'आपातकालीन संपर्क नंबर' : 'Emergency Contact Number'}
+              </Text>
               <TextInput
                 value={emergencyContact}
                 onChangeText={setEmergencyContact}
@@ -241,7 +264,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             </View>
 
             <SeniorButton
-              title="Save Changes"
+              title={isMarathi ? 'बदल जतन करा' : isDevanagari ? 'बदलाव सहेजें' : 'Save Changes'}
               onPress={handleSaveProfile}
               style={styles.modalActionBtn}
             />
@@ -249,7 +272,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               onPress={() => setActiveModal(null)}
               style={styles.modalCancelTouch}
             >
-              <Text style={styles.modalCancelText}>Cancel</Text>
+              <Text style={styles.modalCancelText}>
+                {isMarathi ? 'रद्द करा' : isDevanagari ? 'रद्द करें' : 'Cancel'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -264,13 +289,17 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>App Settings</Text>
+            <Text style={styles.modalTitle}>
+              {isMarathi ? 'अॅप सेटिंग्ज' : isDevanagari ? 'ऐप सेटिंग्स' : 'App Settings'}
+            </Text>
 
             <TouchableOpacity
               onPress={() => setVibrationAlerts(!vibrationAlerts)}
               style={styles.settingToggleRow}
             >
-              <Text style={styles.settingLabel}>Vibration on Scam Detection</Text>
+              <Text style={styles.settingLabel}>
+                {isMarathi ? 'स्कॅम आढळल्यास कंपन' : isDevanagari ? 'स्कैम का पता चलने पर कंपन' : 'Vibration on Scam Detection'}
+              </Text>
               <View style={[styles.togglePill, vibrationAlerts && styles.togglePillActive]}>
                 <View style={[styles.toggleKnob, vibrationAlerts && styles.toggleKnobActive]} />
               </View>
@@ -280,24 +309,28 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               onPress={() => setHighContrast(!highContrast)}
               style={styles.settingToggleRow}
             >
-              <Text style={styles.settingLabel}>High Contrast Mode</Text>
+              <Text style={styles.settingLabel}>
+                {isMarathi ? 'हाय कॉन्ट्रास्ट मोड' : isDevanagari ? 'उच्च कंट्रास्ट मोड' : 'High Contrast Mode'}
+              </Text>
               <View style={[styles.togglePill, highContrast && styles.togglePillActive]}>
                 <View style={[styles.toggleKnob, highContrast && styles.toggleKnobActive]} />
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => setVoiceAssistance(!voiceAssistance)}
+              onPress={() => setDarkMode(!darkMode)}
               style={styles.settingToggleRow}
             >
-              <Text style={styles.settingLabel}>Speech Guidance (TTS)</Text>
-              <View style={[styles.togglePill, voiceAssistance && styles.togglePillActive]}>
-                <View style={[styles.toggleKnob, voiceAssistance && styles.toggleKnobActive]} />
+              <Text style={styles.settingLabel}>
+                {isMarathi ? 'डार्क मोड' : isDevanagari ? 'डार्क मोड' : 'Dark Mode'}
+              </Text>
+              <View style={[styles.togglePill, darkMode && styles.togglePillActive]}>
+                <View style={[styles.toggleKnob, darkMode && styles.toggleKnobActive]} />
               </View>
             </TouchableOpacity>
 
             <SeniorButton
-              title="Done"
+              title={isMarathi ? 'पूर्ण' : isDevanagari ? 'पूर्ण' : 'Done'}
               onPress={() => setActiveModal(null)}
               style={styles.modalActionBtn}
             />
@@ -314,23 +347,35 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Help & Support</Text>
+            <Text style={styles.modalTitle}>
+              {isMarathi ? 'मदत आणि पाठिंबा' : isDevanagari ? 'मदद और सहायता' : 'Help & Support'}
+            </Text>
             <Text style={styles.helpText}>
-              Need assistance? Our safety team and official national emergency services are here to protect you.
+              {isMarathi
+                ? 'मदत हवी आहे? आमची सुरक्षा टीम आणि अधिकृत राष्ट्रीय आपत्कालीन सेवा आपल्या संरक्षणासाठी उपलब्ध आहेत.'
+                : isDevanagari
+                ? 'मदद चाहिए? हमारी सुरक्षा टीम और आधिकारिक राष्ट्रीय आपातकालीन सेवाएं आपकी सुरक्षा के लिए उपस्थित हैं।'
+                : 'Need assistance? Our safety team and official national emergency services are here to protect you.'}
             </Text>
 
             <View style={styles.helpItem}>
-              <Text style={styles.helpItemTitle}>National Cyber Helpline</Text>
-              <Text style={styles.helpItemVal}>Dial 1930 (Toll Free • 24x7)</Text>
+              <Text style={styles.helpItemTitle}>
+                {isMarathi ? 'राष्ट्रीय सायबर हेल्पलाइन' : isDevanagari ? 'राष्ट्रीय साइबर हेल्पलाइन' : 'National Cyber Helpline'}
+              </Text>
+              <Text style={styles.helpItemVal}>
+                {isMarathi ? '1930 वर डायल करा (टोल फ्री • 24x7)' : isDevanagari ? '1930 पर डायल करें (टोल फ्री • 24x7)' : 'Dial 1930 (Toll Free • 24x7)'}
+              </Text>
             </View>
 
             <View style={styles.helpItem}>
-              <Text style={styles.helpItemTitle}>Official Crime Reporting</Text>
+              <Text style={styles.helpItemTitle}>
+                {isMarathi ? 'अधिकृत गुन्हे नोंदणी' : isDevanagari ? 'आधिकारिक अपराध रिपोर्टिंग' : 'Official Crime Reporting'}
+              </Text>
               <Text style={styles.helpItemVal}>https://cybercrime.gov.in</Text>
             </View>
 
             <SeniorButton
-              title="Close"
+              title={isMarathi ? 'बंद करा' : isDevanagari ? 'बंद करें' : 'Close'}
               onPress={() => setActiveModal(null)}
               style={styles.modalActionBtn}
             />
@@ -347,13 +392,21 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>About Rakshon</Text>
-            <Text style={styles.aboutVersion}>Version 1.0.0 (Production)</Text>
+            <Text style={styles.modalTitle}>
+              {isMarathi ? 'रक्षणबद्दल' : isDevanagari ? 'रक्षण के बारे में' : 'About Rakshon'}
+            </Text>
+            <Text style={styles.aboutVersion}>
+              {isMarathi ? 'आवृत्ती 1.0.0 (उत्पादन)' : isDevanagari ? 'संस्करण 1.0.0 (उत्पादन)' : 'Version 1.0.0 (Production)'}
+            </Text>
             <Text style={styles.helpText}>
-              Rakshon is a senior-first digital safety companion engineered for Indian citizens. Powered by AI threat detection, local Android Call Screening, offline threat database, and instant 1930 integration.
+              {isMarathi
+                ? 'रक्षण हे ज्येष्ठ नागरिकांसाठी डिझाइन केलेले डिजिटल सुरक्षा साधन आहे. एआय धोका शोधणे, स्थानिक कॉल स्क्रीनिंग, ऑफलाइन डेटाबेस आणि 1930 हेल्पलाइनसह सुसज्ज.'
+                : isDevanagari
+                ? 'रक्षण वरिष्ठ नागरिकों के लिए डिज़ाइन किया गया डिजिटल सुरक्षा साथी है। एआई खतरा पहचान, स्थानीय कॉल स्क्रीनिंग, ऑफ़लाइन डेटाबेस और तुरंत 1930 एकीकरण द्वारा संचालित।'
+                : 'Rakshon is a senior-first digital safety companion engineered for Indian citizens. Powered by AI threat detection, local Android Call Screening, offline threat database, and instant 1930 integration.'}
             </Text>
             <SeniorButton
-              title="Close"
+              title={isMarathi ? 'बंद करा' : isDevanagari ? 'बंद करें' : 'Close'}
               onPress={() => setActiveModal(null)}
               style={styles.modalActionBtn}
             />
@@ -370,19 +423,25 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>My Safety Activity</Text>
+            <Text style={styles.modalTitle}>
+              {isMarathi ? 'माझी सुरक्षा कृती' : isDevanagari ? 'मेरी सुरक्षा गतिविधि' : 'My Safety Activity'}
+            </Text>
             <View style={styles.activityStatsRow}>
               <View style={styles.activityStatBox}>
                 <Text style={styles.statNum}>14</Text>
-                <Text style={styles.statLabel}>Messages Verified</Text>
+                <Text style={styles.statLabel}>
+                  {isMarathi ? 'तपासलेले संदेश' : isDevanagari ? 'जांचे गए संदेश' : 'Messages Verified'}
+                </Text>
               </View>
               <View style={styles.activityStatBox}>
                 <Text style={styles.statNum}>23</Text>
-                <Text style={styles.statLabel}>Scam Calls Filtered</Text>
+                <Text style={styles.statLabel}>
+                  {isMarathi ? 'रोखलेले स्कॅम कॉल्स' : isDevanagari ? 'रोके गए स्कैम कॉल्स' : 'Scam Calls Filtered'}
+                </Text>
               </View>
             </View>
             <SeniorButton
-              title="Close"
+              title={isMarathi ? 'बंद करा' : isDevanagari ? 'बंद करें' : 'Close'}
               onPress={() => setActiveModal(null)}
               style={styles.modalActionBtn}
             />
