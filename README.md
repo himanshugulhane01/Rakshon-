@@ -244,11 +244,6 @@ These are the reported results for the Feature 1 implementation and its verifica
 **Platform:** Android
 
 **Project Type:** Digital Safety and Cyber Fraud Awareness Assistant
-
-**Demo Video:** [Add your demo video link]
-
-**APK Download:** [Add your APK link, if available]
-
 ---
 
 ## 🤝 Contribution
